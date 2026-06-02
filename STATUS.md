@@ -12,9 +12,10 @@
   `--require-examples`, `--version`, and `--format json` output.
 - Every baseline rule ships a compliant and a violating code example; the schema
   enforces the example shape and `--require-examples` flags enabled rules that omit it.
-- An `export index` subcommand derives a machine-readable JSON rule index into
-  `exports/` (derivation only). No export path for a real scanning engine exists; an
-  execution/SARIF engine remains intentionally out of scope for the current increment.
+- Derivation-only `export index`, `export semgrep`, and `export sarif` subcommands plus a
+  `report coverage` subcommand produce drift-tested `exports/` artifacts: a JSON rule index,
+  a clearly-labelled NON-runnable Semgrep scaffold, and a SARIF rule catalog with no results.
+  The validator stays engine-agnostic and never executes rules or scans code (ADR-0001).
 - The project is now tracked in its own standalone Git repository with a hardened
   CI/CD surface (build/lint/test CI, a security pipeline, and OpenSSF Scorecard),
   Dependabot, CODEOWNERS, and community-health files.
@@ -61,6 +62,12 @@
 
 ## Checks
 
+- 2026-06-02 (final, post-history-rewrite): local suite green — 96 tests at ~93% coverage
+  (gate 90%), `ruff` clean, `validate rules --require-examples --fail-on-warnings` = 19 rules,
+  0 errors, 0 warnings, `exports/` artifacts with no drift. Remote CI/CD verified **green** on
+  the rewritten `master` (`CI`, `Security CI/CD`, `OpenSSF Scorecard`). The actionlint job now
+  uses `egress-policy: audit` (Docker-pull flake fixed); a one-time Gitleaks force-push
+  base-range artifact (no real finding) cleared on the next normal push.
 - `python -m pytest --cov` passed on 2026-06-01 with 78 tests at ~94% coverage
   (gate 90%); `ruff check .` clean; `validate rules --require-examples
   --fail-on-warnings` reported 1 file, 12 rules, 0 errors, 0 warnings; `export index`
@@ -90,8 +97,9 @@
 
 - Cross-file duplicate ID detection applies only when validating a directory with
   two or more YAML rule packs; single-file validation remains file-local.
-- The rule model is still generic and review-oriented. It does not emit rules for
-  Semgrep, CodeQL, SARIF, or another execution engine.
+- The rule model is generic and review-oriented. The `exports/` Semgrep output is a
+  NON-runnable scaffold (placeholder patterns) and the SARIF export is a rule catalog with
+  no results; the pack does not execute rules or scan code in any engine (ADR-0001).
 - Negative fixtures intentionally validate message stability, so future message
   changes must update tests and CLI expectations together.
 - Mapping format checks are warnings, not errors, so unusual but valid identifiers
@@ -103,13 +111,13 @@
 ## Next Steps
 
 - Enable branch protection and required status checks on `master` now that the repo is
-  public and remote CI is green (MEL-001) — highest-value next step.
-- (Done 2026-06-02) Migrated framework mappings to OWASP ASVS 5.0. OWASP publishes no
-  official v4->v5 crosswalk, so identifiers were re-derived by topic against the 5.0.0
-  chapter sources; mappings remain evidence aids, not a conformance claim.
-- Keep engine export design separate from this validator. Expand baseline rules only
-  when each addition has evidence and validation steps; decide whether rate limiting
-  warrants a new schema `category` value before adding a rate-limiting rule.
+  public and remote CI is green (MEL-001) — owner-deferred for now.
+- Re-sign the `v0.1.0` tag (`git tag -f -s v0.1.0 <commit>` then force-push); its SSH
+  signature went stale when history was rewritten on 2026-06-02.
+- Configure the PyPI Trusted Publisher and the `pypi` GitHub Environment so `release.yml`
+  (CycloneDX SBOM + SLSA attestation + OIDC publish) can run end to end, then cut a tagged release.
+- Defer the v1.0 cut (MEL-013) until the expanded contract (new categories, rule lifecycle,
+  optional 2025 mapping, and exports) has had real-world use.
 
 ## Resume Command
 
