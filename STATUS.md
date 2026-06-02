@@ -24,6 +24,11 @@
 
 ## Last Increment
 
+- 2026-06-02 (CI fix + history rewrite): switched the actionlint job to `egress-policy:
+  audit` (digest-pinned image; fixes a flaky Docker-pull failure), and rewrote Git history
+  to remove an accidentally-committed landing-page draft and strip an AI co-author trailer
+  from the initial commit (root subject also corrected; the `v0.1.0` tag was re-pointed).
+  All post-init commit SHAs changed, so SHAs in older notes below no longer resolve.
 - 2026-06-02 (tooling + workflows): added derivation-only `report coverage`,
   `export semgrep` (non-runnable scaffold), and `export sarif` (rule catalog, no results)
   commands with drift-tested `exports/` artifacts; added reference `policy-gate.yml`
@@ -35,13 +40,13 @@
   optional `owasp_top_10_2025` mapping; added rule-lifecycle support (`deprecated` status +
   `deprecation` block); and extended the `category` vocabulary by five values. Suite is now
   83 tests at ~94% coverage; baseline 19 rules, 0 errors, 0 warnings.
-- 2026-06-02 (commit `0c23202`, pushed to `origin/master`): migrated all 12 baseline rules'
+- 2026-06-02 (pushed to `origin/master`): migrated all 12 baseline rules'
   `owasp_asvs` mappings to OWASP ASVS 5.0.0, re-derived by topic against the 5.0.0 chapter
   sources (OWASP publishes no official v4->v5 crosswalk). Regenerated
   `exports/appsec-baseline.index.json` and updated docs. Suite green: 78 tests at ~94%
   coverage; baseline 12 rules, 0 errors, 0 warnings. The repository was then made **public**
   and its About metadata (description, website, topics) populated.
-- 2026-06-01 (commit `1e94c7b`, pushed to `origin/master`): added two baseline rules,
+- 2026-06-01 (pushed to `origin/master`): added two baseline rules,
   `APPSEC-SESSION-001` (session cookie/lifecycle hardening) and `APPSEC-XSS-001`
   (output encoding / XSS), bringing the pack to 12 rules; added an `export index` CLI
   subcommand plus a checked-in `exports/appsec-baseline.index.json` with a drift test;
@@ -66,7 +71,7 @@
 - 2026-06-02 (ASVS 5.0 remap): `pytest --cov` 78 passed at 93.71% (gate 90%); `ruff check .`
   clean; `validate ... --require-examples --fail-on-warnings` = 1 file, 12 rules, 0 errors,
   0 warnings; `export index` regenerated with no drift.
-- 2026-06-02: commit `0c23202` pushed to `origin/master`; remote CI/CD verified **green**
+- 2026-06-02: changes pushed to `origin/master`; remote CI/CD verified **green**
   (`CI`, `Security CI/CD`, `OpenSSF Scorecard`, and `Dependency Graph` all succeeded).
 - `python -m pytest` passed on 2026-05-25 with 69 tests.
 - `python -m pytest --cov=appsec_rules_pack` reported 93% coverage on 2026-05-25
