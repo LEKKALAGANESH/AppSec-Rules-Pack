@@ -20,8 +20,10 @@
   CI/CD surface (build/lint/test CI, a security pipeline, and OpenSSF Scorecard),
   Dependabot, CODEOWNERS, and community-health files.
 - The GitHub repository `lucashgrifoni/AppSec-Rules-Pack` is **public** as of 2026-06-02,
-  with About metadata populated (description, website, topics). `master` is not yet
-  branch-protected (MEL-001).
+  with About metadata populated (description, website, topics). `master` is
+  branch-protected as of 2026-06-03 via the `master-protection` ruleset (MEL-001):
+  require PR (1 review), require the `Lint, test, and validate rules` status check,
+  block force-push and deletion, with repository-admin bypass for the owner.
 
 ## Last Increment
 
@@ -105,17 +107,21 @@
 - Mapping format checks are warnings, not errors, so unusual but valid identifiers
   are not blocked; review warnings during contribution.
 - The CI/CD workflows run on the GitHub remote and are green on `master`. The repository
-  is now public, but branch protection and required status checks are not yet configured
-  (MEL-001) — direct pushes to `master` are still possible.
+  is public and `master` is branch-protected as of 2026-06-03 (MEL-001, `master-protection`
+  ruleset). The repository owner retains an admin bypass, so owner direct pushes are still
+  possible by design; non-bypass actors must open a PR with a passing CI check.
 
 ## Next Steps
 
-- Enable branch protection and required status checks on `master` now that the repo is
-  public and remote CI is green (MEL-001) — owner-deferred for now.
-- Re-sign the `v0.1.0` tag (`git tag -f -s v0.1.0 <commit>` then force-push); its SSH
-  signature went stale when history was rewritten on 2026-06-02.
-- Configure the PyPI Trusted Publisher and the `pypi` GitHub Environment so `release.yml`
-  (CycloneDX SBOM + SLSA attestation + OIDC publish) can run end to end, then cut a tagged release.
+- ~~Enable branch protection and required status checks on `master`~~ — **done 2026-06-03**
+  (MEL-001; `master-protection` ruleset, admin bypass for the owner).
+- ~~Re-sign the `v0.1.0` tag~~ — **done 2026-06-03**; the tag was re-created at `489cea4`
+  with a fresh SSH signature and force-pushed. The remote reports the tag as verified and
+  the existing GitHub Release (wheel + sdist) is intact.
+- **Owner handoff (external, cannot be done from the CLI):** configure the PyPI Trusted
+  Publisher and the `pypi` GitHub Environment so `release.yml` (CycloneDX SBOM + SLSA
+  attestation + OIDC publish) can run end to end, then cut a tagged release. Rotate the
+  plaintext provider tokens first.
 - Defer the v1.0 cut (MEL-013) until the expanded contract (new categories, rule lifecycle,
   optional 2025 mapping, and exports) has had real-world use.
 
