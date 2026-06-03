@@ -46,7 +46,7 @@ statement of intent, not a delivery commitment, and is kept consistent with
   remediation, and validation steps (for example, cryptography-at-rest and additional
   business-logic abuse cases); the CSRF, enumeration, webhook-authenticity, data-exposure,
   mass-assignment, open-redirect, and rate-limiting rules are now delivered.
-- Finish the v0.3 supply-chain release path: the `release.yml` workflow (CycloneDX SBOM +
+- Finish the v0.3 supply-chain release path: the `publish-pypi.yml` workflow (CycloneDX SBOM +
   SLSA build-provenance attestation + PyPI Trusted Publishing via OIDC) is in place;
   configure the PyPI Trusted Publisher and the `pypi` environment, then cut a tagged
   release to exercise it end to end.

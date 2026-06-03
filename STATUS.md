@@ -35,7 +35,7 @@
 - 2026-06-02 (tooling + workflows): added derivation-only `report coverage`,
   `export semgrep` (non-runnable scaffold), and `export sarif` (rule catalog, no results)
   commands with drift-tested `exports/` artifacts; added reference `policy-gate.yml`
-  (consumes validator JSON, ADR-0004) and `release.yml` (SBOM + SLSA attestation + PyPI
+  (consumes validator JSON, ADR-0004) and `publish-pypi.yml` (SBOM + SLSA attestation + PyPI
   OIDC; PyPI publisher config is an owner handoff). Suite is now 96 tests at ~93% coverage.
 - 2026-06-02 (rules v0.2 expansion): grew the baseline pack from 12 to 19 rules
   (`APPSEC-CSRF-001`, `APPSEC-ENUM-001`, `APPSEC-MSGAUTH-001`, `APPSEC-DATAEXPO-001`,
@@ -119,7 +119,7 @@
   with a fresh SSH signature and force-pushed. The remote reports the tag as verified and
   the existing GitHub Release (wheel + sdist) is intact.
 - **Owner handoff (external, cannot be done from the CLI):** configure the PyPI Trusted
-  Publisher and the `pypi` GitHub Environment so `release.yml` (CycloneDX SBOM + SLSA
+  Publisher and the `pypi` GitHub Environment so `publish-pypi.yml` (CycloneDX SBOM + SLSA
   attestation + OIDC publish) can run end to end, then cut a tagged release. Rotate the
   plaintext provider tokens first.
 - Defer the v1.0 cut (MEL-013) until the expanded contract (new categories, rule lifecycle,

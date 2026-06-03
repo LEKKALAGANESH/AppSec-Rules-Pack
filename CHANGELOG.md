@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   labeled NON-runnable Semgrep scaffold), and `export sarif` (a SARIF 2.1.0 rule catalog
   with empty results). Checked-in `exports/` artifacts are drift-tested.
 - Added reference CI workflows: `policy-gate.yml` (a separate gate that consumes the
-  validator JSON, per ADR-0004) and `release.yml` (build + CycloneDX SBOM + SLSA build
+  validator JSON, per ADR-0004) and `publish-pypi.yml` (build + CycloneDX SBOM + SLSA build
   provenance attestation + PyPI Trusted Publishing via OIDC; the PyPI publisher config is
   an owner handoff).
 - Expanded the baseline pack from 12 to 19 rules: `APPSEC-CSRF-001` (CSRF),

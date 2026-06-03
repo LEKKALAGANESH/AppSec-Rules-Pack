@@ -1,6 +1,6 @@
-name: Release
+name: Publish to PyPI
 
-# Release pipeline (supply-chain evidence). On a version tag it:
+# Release / publish pipeline (supply-chain evidence). On a version tag it:
 #   - builds the wheel and sdist,
 #   - generates a CycloneDX SBOM for the built distribution,
 #   - attests build provenance (GitHub Artifact Attestations / SLSA),
