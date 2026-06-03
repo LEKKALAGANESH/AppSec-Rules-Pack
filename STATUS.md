@@ -27,6 +27,14 @@
 
 ## Last Increment
 
+- 2026-06-03 (release path validated): enabled `master` branch protection (MEL-001) and
+  re-signed/force-pushed the `v0.1.0` tag (now verified on the remote, Release intact).
+  Renamed the publish workflow `release.yml` -> `publish-pypi.yml` to match the cross-project
+  convention and the PyPI Trusted Publisher's workflow-name field. Fixed the CycloneDX SBOM
+  step (`cyclonedx-bom` 7.3.0 has no `--outfile`; use `--output-file`, pin the tool to 7.3.0)
+  and validated build + SBOM + SLSA attestation green via a `workflow_dispatch` dry-run (the
+  publish and Release-asset steps are tag-gated and correctly skip until a `v*` tag is pushed).
+  The PyPI pending publisher is configured; token rotation is still owner-pending.
 - 2026-06-02 (CI fix + history rewrite): switched the actionlint job to `egress-policy:
   audit` (digest-pinned image; fixes a flaky Docker-pull failure), and rewrote Git history
   to remove an accidentally-committed landing-page draft and strip an AI co-author trailer
