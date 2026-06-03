@@ -84,10 +84,18 @@ jobs:
           # is attached to the GitHub Release instead of uploaded to PyPI.
           attestations: true
 
-      - name: Attach SBOM and artifacts to the GitHub Release
+      - name: Create or update the GitHub Release with SBOM and artifacts
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload "${GITHUB_REF_NAME}" \
-            sbom.cdx.json dist/*.whl dist/*.tar.gz --clobber
+          # Idempotent: create the Release (with generated notes) if it does not
+          # exist yet for this tag, otherwise just (re)upload the assets.
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" \
+              sbom.cdx.json dist/*.whl dist/*.tar.gz --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" \
+              sbom.cdx.json dist/*.whl dist/*.tar.gz \
+              --title "${GITHUB_REF_NAME}" --generate-notes --verify-tag
+          fi
