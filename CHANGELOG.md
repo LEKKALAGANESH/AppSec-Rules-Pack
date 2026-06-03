@@ -27,12 +27,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Extended the `category` vocabulary with `csrf`, `integrity`, `data-exposure`,
   `open-redirect`, and `rate-limiting` (additive; existing rules unaffected).
 - Migrated all baseline rule `owasp_asvs` mappings to OWASP ASVS 5.0.0. The 5.0
-  reorganization renumbered chapters, so identifiers were re-derived by topic against
-  the official 5.0.0 chapter sources (OWASP publishes no v4-to-v5 crosswalk) — for
-  example authorization `V4.1`->`V8.2`, authentication/session `V2.1,V3.2`->`V6.3,V7.2`,
-  injection/XSS `V5.3`->`V1.2`, logging `V7.1`->`V16.2,V16.3`, configuration/secrets
-  `V14.1,V14.8`->`V13.4,V13.3`, dependencies `V14.2`->`V15.2`, files `V12.1`->`V5.2,V5.3`,
-  SSRF `V12.6`->`V1.3`. Mappings remain evidence aids, not a conformance claim.
+  reorganization renumbered the standard into 17 chapters (V1-V17), so identifiers were
+  assigned by topic to the 5.0.0 chapters and verified against the 5.0.0 chapter/section
+  structure and the official v5.0.0-to-v4.0.3 mapping
+  (`5.0/mappings/mapping_v5.0.0_to_v4.0.3.yml`) — for example authorization
+  `V4.1`->`V8.2`, authentication/session `V2.1,V3.2`->`V6.3,V7.2`, injection (incl. XSS,
+  which 5.0 folds into Injection Prevention) `V5.3`->`V1.2`, logging
+  `V7.1`->`V16.2,V16.3`, configuration/secrets `V14.1,V14.8`->`V13.4,V13.3`, dependencies
+  `V14.2`->`V15.2`, files `V12.1`->`V5.2,V5.3`, SSRF `V12.6`->`V1.3` (Sanitization, 1.3.6).
+  Mappings remain evidence aids, not a conformance claim.
 - Added two baseline rules, raising the pack to 12 rules: `APPSEC-SESSION-001`
   (session cookie and lifecycle hardening) and `APPSEC-XSS-001` (output encoding /
   cross-site scripting). Both ship compliant and violating examples and were prioritised

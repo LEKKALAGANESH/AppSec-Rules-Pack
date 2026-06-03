@@ -30,8 +30,9 @@ statement of intent, not a delivery commitment, and is kept consistent with
   the public GitHub remote and green on `master`.
 - Per-rule compliant and violating examples on every baseline rule, with an opt-in
   `--require-examples` validation flag (delivered after the v0.1.0 tag).
-- All `owasp_asvs` mappings migrated to OWASP ASVS 5.0.0 (re-derived by topic; OWASP
-  publishes no official v4->v5 crosswalk). Mappings remain evidence aids, not a claim.
+- All `owasp_asvs` mappings migrated to OWASP ASVS 5.0.0 (assigned by topic and verified
+  against the 5.0.0 chapter/section structure and the official v5.0.0-to-v4.0.3 mapping
+  under `5.0/mappings/`). Mappings remain evidence aids, not a claim.
 - Tagged `v0.1.0` release published; the GitHub repository is public as of 2026-06-02.
 - `master` branch-protected via the `master-protection` ruleset (2026-06-03).
 - Tagged `v0.2.0` published to PyPI as `appsec-rules-pack` via OIDC Trusted Publishing
