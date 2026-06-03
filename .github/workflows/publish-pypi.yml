@@ -63,11 +63,11 @@ jobs:
 
       - name: Generate CycloneDX SBOM for the built distribution
         run: |
-          python -m pip install cyclonedx-bom
+          python -m pip install "cyclonedx-bom==7.3.0"
           python -m venv /tmp/sbomenv
           /tmp/sbomenv/bin/python -m pip install dist/*.whl
           cyclonedx-py environment /tmp/sbomenv/bin/python \
-            --output-format json --outfile sbom.cdx.json
+            --output-format JSON --output-file sbom.cdx.json
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
