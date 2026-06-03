@@ -28,6 +28,10 @@
   workflow (Trusted Publishing / OIDC, no long-lived token). The v0.2.0 GitHub Release carries
   the wheel, sdist, and a CycloneDX SBOM, with a SLSA build-provenance attestation. Installable
   with `pip install appsec-rules-pack`.
+- A landing page is published on GitHub Pages at
+  https://lucashgrifoni.github.io/AppSec-Rules-Pack/ (the repository "website" points to it).
+  It is deployed from an orphan `gh-pages` branch (index.html + .nojekyll only); the local
+  `gitpage/` source stays git-ignored on `master`, so the package repo remains clean.
 
 ## Last Increment
 
