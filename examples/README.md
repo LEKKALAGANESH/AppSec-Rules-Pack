@@ -3,8 +3,8 @@
 This template shows how a downstream repository can validate an AppSec rules
 directory in GitHub Actions.
 
-Replace `<reviewed-tag-or-commit>` with an immutable tag or commit before using it
-in a production quality gate.
+Pin `appsec-rules-pack` to a reviewed release version before using it in a production
+quality gate.
 
 ```yaml
 name: Validate AppSec Rules
@@ -33,7 +33,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install AppSec Rules Pack
-        run: python -m pip install "appsec-rules-pack @ git+https://github.com/lucashgrifoni/AppSec-Rules-Pack.git@<reviewed-tag-or-commit>"
+        run: python -m pip install "appsec-rules-pack==0.2.0"
 
       - name: Validate rules
         run: appsec-rules validate rules --fail-on-warnings --format json

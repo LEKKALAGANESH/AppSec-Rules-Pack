@@ -5,6 +5,7 @@
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/lucashgrifoni/AppSec-Rules-Pack/badge)](https://scorecard.dev/viewer/?uri=github.com/lucashgrifoni/AppSec-Rules-Pack)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)
+[![PyPI](https://img.shields.io/pypi/v/appsec-rules-pack.svg)](https://pypi.org/project/appsec-rules-pack/)
 
 Reusable AppSec policy-as-code rules for secure application review, CI quality gates,
 and manual evidence collection.
@@ -54,6 +55,8 @@ configuration.
 |   |   `-- rule_proposal.md
 |   |-- workflows/
 |   |   |-- ci.yml
+|   |   |-- policy-gate.yml
+|   |   |-- publish-pypi.yml
 |   |   |-- scorecard.yml
 |   |   `-- security-ci-cd.yml
 |   |-- CODEOWNERS
@@ -61,6 +64,12 @@ configuration.
 |   `-- dependabot.yml
 |-- examples/
 |   `-- README.md
+|-- exports/
+|   |-- appsec-baseline.index.json
+|   |-- sarif/
+|   |   `-- appsec-baseline.sarif.json
+|   `-- semgrep/
+|       `-- appsec-baseline.semgrep.yaml
 |-- rules/
 |   `-- appsec-baseline.yaml
 |-- src/
@@ -68,7 +77,11 @@ configuration.
 |       |-- __init__.py
 |       |-- __main__.py
 |       |-- cli.py
+|       |-- exporter.py
 |       |-- loader.py
+|       |-- reporter.py
+|       |-- sarif_export.py
+|       |-- semgrep_scaffold.py
 |       |-- validator.py
 |       `-- schemas/
 |           `-- appsec-rule.schema.json
@@ -81,10 +94,19 @@ configuration.
 |   |   `-- warn/
 |   |-- test_edge_cases.py
 |   |-- test_examples.py
+|   |-- test_exporter.py
+|   |-- test_lifecycle_and_mappings.py
 |   |-- test_loader.py
 |   |-- test_packaging.py
+|   |-- test_reporter.py
+|   |-- test_sarif_export.py
+|   |-- test_schema.py
+|   |-- test_semgrep_scaffold.py
 |   |-- test_validator.py
 |   `-- test_validator_paths.py
+|-- .gitattributes
+|-- .gitignore
+|-- .gitleaks.toml
 |-- CHANGELOG.md
 |-- CODE_OF_CONDUCT.md
 |-- CONTRIBUTING.md
@@ -97,7 +119,18 @@ configuration.
 `-- pyproject.toml
 ```
 
-## Setup
+## Installation
+
+Install the published package from PyPI:
+
+```bash
+pip install appsec-rules-pack
+```
+
+This installs the `appsec-rules` console script. Pin to a reviewed version
+(for example `appsec-rules-pack==0.2.0`) when using it in a CI quality gate.
+
+### From source (development)
 
 ```powershell
 python -m venv .venv
@@ -172,9 +205,9 @@ code is non-zero when validation fails, matching the text output.
 
 ## Use It In Your CI
 
-`examples/README.md` contains a GitHub Actions template for installing the pack,
-validating a rules directory, and failing the build on errors (and optionally
-warnings). Pin the template to a reviewed tag or commit before enabling it as a
+`examples/README.md` contains a GitHub Actions template for installing the pack from
+PyPI, validating a rules directory, and failing the build on errors (and optionally
+warnings). Pin the install to a reviewed release version before enabling it as a
 quality gate.
 
 ## Rule Pack Model

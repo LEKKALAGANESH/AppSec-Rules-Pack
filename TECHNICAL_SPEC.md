@@ -16,8 +16,11 @@ as a starting point for secure code review or CI policy gates.
 ## Non-Goals
 
 - No customer-specific controls, secrets, identifiers, endpoints, or proprietary data.
-- No production enforcement integration in the first skeleton.
-- No scanner-specific rule language such as Semgrep, CodeQL, OPA/Rego, or SARIF output yet.
+- No production enforcement built into the validator; `policy-gate.yml` is a reference
+  gate that consumes the validator JSON (ADR-0004), not a managed enforcement service.
+- No execution of rules or code scanning in any engine (Semgrep, CodeQL, OPA/Rego).
+  The `exports/` Semgrep scaffold and SARIF catalog are derivation-only references
+  (a non-runnable scaffold and a no-results catalog), not working detections (ADR-0001).
 - No vulnerability severity claims without evidence from the local rule content.
 
 ## Rule Contract
@@ -69,8 +72,13 @@ for CI consumption.
 - Deepen reference exports under `exports/` (rule index, Semgrep scaffold, and SARIF
   rule catalog are delivered; add real detection patterns or other formats as needed).
 - Add pass/fail fixtures per rule under `fixtures/`.
-- Add signed release evidence once versioned releases begin.
+
+Signed release evidence is in place: tagged releases publish to PyPI via Trusted
+Publishing (OIDC, no long-lived token) and attach a CycloneDX SBOM plus a SLSA
+build-provenance attestation through `.github/workflows/publish-pypi.yml`.
 
 CI integration via GitHub Actions (`.github/workflows/ci.yml`) and a coverage gate
-are already in place; the workflow lints, tests with coverage, validates the baseline
-with `--fail-on-warnings`, and builds distribution artifacts.
+are in place — the workflow lints, tests with coverage, validates the baseline with
+`--fail-on-warnings`, and builds distribution artifacts — alongside a security
+pipeline (`security-ci-cd.yml`), OpenSSF Scorecard (`scorecard.yml`), and a reference
+policy gate (`policy-gate.yml`).
