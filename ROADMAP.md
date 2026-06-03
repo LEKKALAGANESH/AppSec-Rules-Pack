@@ -33,6 +33,10 @@ statement of intent, not a delivery commitment, and is kept consistent with
 - All `owasp_asvs` mappings migrated to OWASP ASVS 5.0.0 (re-derived by topic; OWASP
   publishes no official v4->v5 crosswalk). Mappings remain evidence aids, not a claim.
 - Tagged `v0.1.0` release published; the GitHub repository is public as of 2026-06-02.
+- `master` branch-protected via the `master-protection` ruleset (2026-06-03).
+- Tagged `v0.2.0` published to PyPI as `appsec-rules-pack` via OIDC Trusted Publishing
+  (2026-06-03), with a CycloneDX SBOM and a SLSA build-provenance attestation attached to
+  the GitHub Release.
 - Optional `owasp_top_10_2025` mapping field (additive, backward-compatible) populated on
   the rules where a 2025 category maps cleanly.
 - Rule lifecycle support: a `deprecated` status plus an optional `deprecation` block
@@ -40,16 +44,14 @@ statement of intent, not a delivery commitment, and is kept consistent with
 
 ## Next — Near term
 
-- Enable branch protection and required status checks on `master` now that the repository
-  is public and CI is green.
 - Expand the baseline pack further by demand where each addition has clear evidence,
   remediation, and validation steps (for example, cryptography-at-rest and additional
   business-logic abuse cases); the CSRF, enumeration, webhook-authenticity, data-exposure,
   mass-assignment, open-redirect, and rate-limiting rules are now delivered.
-- Finish the v0.3 supply-chain release path: the `publish-pypi.yml` workflow (CycloneDX SBOM +
-  SLSA build-provenance attestation + PyPI Trusted Publishing via OIDC) is in place;
-  configure the PyPI Trusted Publisher and the `pypi` environment, then cut a tagged
-  release to exercise it end to end.
+- The v0.3 supply-chain release path is delivered: `publish-pypi.yml` now publishes to PyPI
+  via OIDC Trusted Publishing with a CycloneDX SBOM and SLSA build-provenance attestation,
+  exercised end to end by the `v0.2.0` release. Remaining owner action: rotate/retire any
+  legacy provider tokens.
 
 ## Later — Mid term
 

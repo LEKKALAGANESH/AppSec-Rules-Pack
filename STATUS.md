@@ -24,9 +24,19 @@
   branch-protected as of 2026-06-03 via the `master-protection` ruleset (MEL-001):
   require PR (1 review), require the `Lint, test, and validate rules` status check,
   block force-push and deletion, with repository-admin bypass for the owner.
+- Published to PyPI as `appsec-rules-pack` **0.2.0** on 2026-06-03 via the `publish-pypi.yml`
+  workflow (Trusted Publishing / OIDC, no long-lived token). The v0.2.0 GitHub Release carries
+  the wheel, sdist, and a CycloneDX SBOM, with a SLSA build-provenance attestation. Installable
+  with `pip install appsec-rules-pack`.
 
 ## Last Increment
 
+- 2026-06-03 (v0.2.0 published): cut and published `appsec-rules-pack` 0.2.0 to PyPI via OIDC
+  Trusted Publishing. Bumped the package and rules-pack content version to 0.2.0, moved the
+  schema `$id` to the v0.2.0 tag (per the schema's versioning policy), regenerated the
+  `exports/` JSON index and SARIF catalog, and finalized the CHANGELOG. The signed `v0.2.0`
+  tag drove `publish-pypi.yml` end to end: build, CycloneDX SBOM, SLSA attestation, PyPI
+  publish, and a GitHub Release (wheel + sdist + SBOM). Release run green.
 - 2026-06-03 (release path validated): enabled `master` branch protection (MEL-001) and
   re-signed/force-pushed the `v0.1.0` tag (now verified on the remote, Release intact).
   Renamed the publish workflow `release.yml` -> `publish-pypi.yml` to match the cross-project
@@ -72,6 +82,12 @@
 
 ## Checks
 
+- 2026-06-03 (v0.2.0 release): local suite green — 96 tests at 92.73% coverage (gate 90%),
+  `ruff` clean, `validate rules --require-examples --fail-on-warnings` = 1 file, 19 rules,
+  0 errors, 0 warnings, CLI `--version` = 0.2.0, `exports/` regenerated with no drift. The
+  remote `publish-pypi.yml` run on tag `v0.2.0` (run 26891035504) succeeded across build,
+  SBOM, SLSA attestation, PyPI publish, and GitHub Release. PyPI JSON API confirms
+  `appsec-rules-pack` 0.2.0 with wheel + sdist.
 - 2026-06-02 (final, post-history-rewrite): local suite green — 96 tests at ~93% coverage
   (gate 90%), `ruff` clean, `validate rules --require-examples --fail-on-warnings` = 19 rules,
   0 errors, 0 warnings, `exports/` artifacts with no drift. Remote CI/CD verified **green** on
@@ -126,10 +142,12 @@
 - ~~Re-sign the `v0.1.0` tag~~ — **done 2026-06-03**; the tag was re-created at `489cea4`
   with a fresh SSH signature and force-pushed. The remote reports the tag as verified and
   the existing GitHub Release (wheel + sdist) is intact.
-- **Owner handoff (external, cannot be done from the CLI):** configure the PyPI Trusted
-  Publisher and the `pypi` GitHub Environment so `publish-pypi.yml` (CycloneDX SBOM + SLSA
-  attestation + OIDC publish) can run end to end, then cut a tagged release. Rotate the
-  plaintext provider tokens first.
+- ~~Configure the PyPI Trusted Publisher and cut a tagged release~~ — **done 2026-06-03**;
+  `appsec-rules-pack` 0.2.0 is live on PyPI via OIDC Trusted Publishing, and `publish-pypi.yml`
+  now creates the GitHub Release idempotently from the tag.
+- **Owner action (external, cannot be done from the CLI):** rotate the plaintext provider
+  tokens (GitHub / Azure / Sonar / Snyk / PyPI). With Trusted Publishing in place, any legacy
+  PyPI API token can be deleted outright instead of rotated.
 - Defer the v1.0 cut (MEL-013) until the expanded contract (new categories, rule lifecycle,
   optional 2025 mapping, and exports) has had real-world use.
 
