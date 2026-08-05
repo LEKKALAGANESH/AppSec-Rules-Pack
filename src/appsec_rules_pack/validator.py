@@ -181,14 +181,18 @@ def validate_rules_payload(payload: Any, *, require_examples: bool = False) -> V
     schema = _load_schema()
     validator = jsonschema.Draft202012Validator(schema)
 
+    # jsonschema reports one error per missing required property, but the rendered
+    # message names every missing field at that location. Three missing fields therefore
+    # produced three byte-identical lines, and inflated the reported error count. An
+    # identical level+path+message carries no extra information, so it is dropped.
+    seen_schema_issues: set[tuple[str, tuple[Any, ...]]] = set()
     for error in sorted(validator.iter_errors(payload), key=lambda item: list(item.path)):
-        issues.append(
-            ValidationIssue(
-                level="error",
-                message=_schema_issue_message(error),
-                path=tuple(error.absolute_path),
-            )
-        )
+        message = _schema_issue_message(error)
+        path = tuple(error.absolute_path)
+        if (message, path) in seen_schema_issues:
+            continue
+        seen_schema_issues.add((message, path))
+        issues.append(ValidationIssue(level="error", message=message, path=path))
 
     if isinstance(payload, dict):
         issues.extend(_semantic_issues(payload, require_examples=require_examples))

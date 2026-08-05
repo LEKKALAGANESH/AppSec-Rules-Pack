@@ -225,3 +225,53 @@ def test_cli_validate_directory_reports_file_and_clear_error() -> None:
         result.output
     )
     assert "Validation failed: 5 files, 6 rules, 5 errors, 0 warnings." in result.output
+
+def test_missing_required_fields_are_reported_once_not_once_per_field() -> None:
+    """A location missing N required fields must produce one issue, not N identical ones.
+
+    jsonschema raises one error per missing required property, but the rendered message
+    names every missing field at that location. `match: {}` therefore printed
+    "missing required fields: 'type', 'includes', 'excludes'" three times and counted
+    three errors: noise for the reader and an inflated error count for CI.
+
+    Found by using the CLI as a new user writing their first rules pack.
+    """
+
+    payload = {
+        "pack": {
+            "id": "dup-pack",
+            "name": "Dup Pack",
+            "version": "0.1.0",
+            "mode": "advisory",
+            "owner": "appsec",
+            "description": "Pack whose rule omits every field required by match.",
+        },
+        "rules": [{"id": "APPSEC-DUP-001", "match": {}}],
+    }
+
+    result = validate_rules_payload(payload)
+
+    match_issues = [issue for issue in result.issues if issue.path == ("rules", 0, "match")]
+    assert len(match_issues) == 1, [issue.message for issue in match_issues]
+    assert match_issues[0].message == "missing required fields: 'type', 'includes', 'excludes'"
+
+
+def test_deduplication_keeps_the_same_message_at_different_locations() -> None:
+    """Only an identical level+path+message is redundant; distinct paths must survive."""
+
+    payload = {
+        "pack": {
+            "id": "dup-pack",
+            "name": "Dup Pack",
+            "version": "0.1.0",
+            "mode": "advisory",
+            "owner": "appsec",
+            "description": "Pack with two rules that omit the same required fields.",
+        },
+        "rules": [{"id": "APPSEC-DUP-001", "match": {}}, {"id": "APPSEC-DUP-002", "match": {}}],
+    }
+
+    result = validate_rules_payload(payload)
+
+    paths = [issue.path for issue in result.issues if issue.path[-1:] == ("match",)]
+    assert paths == [("rules", 0, "match"), ("rules", 1, "match")]
