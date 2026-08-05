@@ -5,7 +5,7 @@
       "pack": {
         "id": "appsec-baseline",
         "name": "AppSec Baseline Rules Pack",
-        "version": "0.2.0"
+        "version": "0.3.0"
       },
       "rules": [
         {
@@ -116,6 +116,9 @@
             ],
             "owasp_api_top_10_2023": [
               "API7:2023"
+            ],
+            "owasp_top_10_2025": [
+              "A01:2025"
             ],
             "cwe": [
               "CWE-918"

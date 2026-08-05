@@ -5,7 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## v0.3.0 - 2026-08-05
+
+- The baseline pack is now attached to every GitHub Release as `appsec-baseline.yaml`.
+  The distribution ships the validator and the schema but no rules, so this gives
+  consumers a version-pinned copy without cloning the repository.
+- `APPSEC-SSRF-001` now maps to `A01:2025`. The OWASP Top 10:2025 introduction states that
+  SSRF has been rolled into Broken Access Control, and CWE-918 is listed among that
+  category's mapped CWEs. `APPSEC-FILE-001` and `APPSEC-RATELIMIT-001` remain unmapped
+  pending a written rule for how this field is assigned — the pack maps by topic rather
+  than by CWE membership, and that convention has never been documented.
+- Raised the coverage gate from 90% to 95% (actual is 97.46%). A gate far below the real
+  number permits a silent regression the size of the gap.
+- CI now exercises Python 3.13 in a dedicated job. `requires-python = ">=3.12"` has always
+  admitted 3.13, and nothing tested it.
 
 - An unwritable `--output` now reports an actionable error instead of a traceback.
   Pointing it at an existing directory escaped as a raw `PermissionError` (Windows) or

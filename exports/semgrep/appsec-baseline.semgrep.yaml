@@ -93,6 +93,8 @@ rules:
     - V1.3
     owasp-api-top-10-2023:
     - API7:2023
+    owasp-top-10-2025:
+    - A01:2025
     nist-ssdf:
     - PW.8
   pattern-regex: TODO-REPLACE-WITH-DETECTION-PATTERN

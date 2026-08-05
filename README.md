@@ -37,10 +37,11 @@ configuration.
   enum/type/additionalProperties failures, duplicate rule IDs, cross-file
   duplicate IDs, exception-window warnings, exception-policy contradictions,
   malformed framework mapping IDs, and sensitive-value detection.
-- A 90% coverage gate plus a hardened CI/CD surface: a build/lint/test workflow (with a
-  separate job running the suite on Ubuntu and Windows), a security pipeline (Semgrep,
-  CodeQL, Bandit, Trivy, KICS, pip-audit, Gitleaks, Dependency Review, actionlint), and
-  OpenSSF Scorecard analysis.
+- A 95% coverage gate plus a hardened CI/CD surface: a build/lint/test workflow (with
+  separate jobs running the suite on Ubuntu and Windows, and on Python 3.13), a security
+  pipeline (Semgrep, CodeQL, Bandit, Trivy, KICS, pip-audit, Gitleaks, Dependency Review,
+  actionlint), and OpenSSF Scorecard analysis. The build/lint/test, cross-platform, and
+  security jobs are required status checks on `master`.
 - Contribution guidance for safe rule additions, a code of conduct, and issue/PR
   templates.
 - A CI integration template in `examples/`.
@@ -119,13 +120,20 @@ pip install appsec-rules-pack
 ```
 
 This installs the `appsec-rules` console script. Pin to a reviewed version
-(for example `appsec-rules-pack==0.2.0`) when using it in a CI quality gate.
+(for example `appsec-rules-pack==0.3.0`) when using it in a CI quality gate.
 
 **What the distribution contains:** the validator, the CLI, and the JSON Schema. It does
-not ship a rules pack — the CLI validates whatever path you point it at. The baseline pack
-of 19 rules lives in this repository at
-[`rules/appsec-baseline.yaml`](rules/appsec-baseline.yaml); copy it into your project as a
-starting point, or write your own pack using the example below.
+not ship a rules pack — the CLI validates whatever path you point it at.
+
+To get the baseline pack of 19 rules, either take the version-pinned copy attached to each
+GitHub Release:
+
+```bash
+curl -LO https://github.com/lucashgrifoni/AppSec-Rules-Pack/releases/download/v0.3.0/appsec-baseline.yaml
+```
+
+or copy [`rules/appsec-baseline.yaml`](rules/appsec-baseline.yaml) from this repository.
+You can also write your own pack from the example below.
 
 ### From source (development)
 

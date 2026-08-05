@@ -35,6 +35,18 @@
 
 ## Last Increment
 
+- 2026-08-05 (v0.3.0 prepared): bumped the package and pack version to 0.3.0. The schema
+  `$id` deliberately **stays** at the v0.2.0 tag: its own `$comment` policy moves it only
+  when the schema changes in a way that affects consumers, and `git diff v0.2.0..HEAD --
+  src/appsec_rules_pack/schemas/` is empty. Attached the baseline pack to the GitHub
+  Release, mapped `APPSEC-SSRF-001` to `A01:2025` (2025 mapping coverage 16/19 -> 17/19),
+  raised the coverage gate 90% -> 95%, and added a Python 3.13 CI job. Also widened the
+  `master-protection` ruleset from 1 required status check to 13: the two cross-platform
+  jobs plus the ten unconditional Security CI/CD jobs. `OpenSSF Scorecard` and
+  `policy-gate` are deliberately excluded — neither runs on every pull request (Scorecard
+  has no `pull_request` trigger; policy-gate is path-filtered), so requiring them would
+  block every PR on a check that never reports.
+
 - 2026-08-05 (first-use experience, found by using the CLI as a new user): installed the
   published package into a clean venv and followed only the public docs. Three defects that
   no automated test caught. (1) The first documented command failed: `validate
