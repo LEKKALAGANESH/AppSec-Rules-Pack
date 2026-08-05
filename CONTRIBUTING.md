@@ -45,11 +45,15 @@ review before being added to this pack.
 ## Required Checks
 
 ```powershell
-python -m appsec_rules_pack validate rules --fail-on-warnings
+python -m appsec_rules_pack validate rules --require-examples --fail-on-warnings
 python -m ruff check .
 python -m pytest --cov=appsec_rules_pack --cov-report=term-missing
 python -m build
 ```
+
+These are the same commands CI runs. `--require-examples` matters: CI passes it, so a
+rule without a compliant and violating example passes locally without the flag and then
+fails the build.
 
 Validation must report zero errors and zero warnings before a rule change is merged.
 Framework mapping identifiers must use canonical formats (for example `CWE-79`,

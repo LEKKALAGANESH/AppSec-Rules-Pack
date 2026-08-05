@@ -37,9 +37,10 @@ configuration.
   enum/type/additionalProperties failures, duplicate rule IDs, cross-file
   duplicate IDs, exception-window warnings, exception-policy contradictions,
   malformed framework mapping IDs, and sensitive-value detection.
-- A 90% coverage gate plus a hardened CI/CD surface: a build/lint/test workflow,
-  a security pipeline (Semgrep, CodeQL, Bandit, Trivy, KICS, pip-audit, Gitleaks,
-  Dependency Review, actionlint), and OpenSSF Scorecard analysis.
+- A 90% coverage gate plus a hardened CI/CD surface: a build/lint/test workflow (with a
+  separate job running the suite on Ubuntu and Windows), a security pipeline (Semgrep,
+  CodeQL, Bandit, Trivy, KICS, pip-audit, Gitleaks, Dependency Review, actionlint), and
+  OpenSSF Scorecard analysis.
 - Contribution guidance for safe rule additions, a code of conduct, and issue/PR
   templates.
 - A CI integration template in `examples/`.
@@ -92,18 +93,8 @@ configuration.
 |   |   |-- fail/
 |   |   |-- pass/
 |   |   `-- warn/
-|   |-- test_edge_cases.py
-|   |-- test_examples.py
-|   |-- test_exporter.py
-|   |-- test_lifecycle_and_mappings.py
-|   |-- test_loader.py
-|   |-- test_packaging.py
-|   |-- test_reporter.py
-|   |-- test_sarif_export.py
-|   |-- test_schema.py
-|   |-- test_semgrep_scaffold.py
-|   |-- test_validator.py
-|   `-- test_validator_paths.py
+|   |-- helpers.py        # shared subprocess helper for tests that shell out
+|   `-- test_*.py         # one module per validated behaviour
 |-- .gitattributes
 |-- .gitignore
 |-- .gitleaks.toml
