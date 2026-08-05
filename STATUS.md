@@ -132,7 +132,7 @@
   step (`cyclonedx-bom` 7.3.0 has no `--outfile`; use `--output-file`, pin the tool to 7.3.0)
   and validated build + SBOM + SLSA attestation green via a `workflow_dispatch` dry-run (the
   publish and Release-asset steps are tag-gated and correctly skip until a `v*` tag is pushed).
-  The PyPI pending publisher is configured; token rotation is still owner-pending.
+  The PyPI pending publisher is configured.
 - 2026-06-02 (CI fix + history rewrite): switched the actionlint job to `egress-policy:
   audit` (digest-pinned image; fixes a flaky Docker-pull failure), and rewrote Git history
   to remove an accidentally-committed landing-page draft and strip an AI co-author trailer
@@ -242,9 +242,10 @@
 - ~~Configure the PyPI Trusted Publisher and cut a tagged release~~ — **done 2026-06-03**;
   `appsec-rules-pack` 0.2.0 is live on PyPI via OIDC Trusted Publishing, and `publish-pypi.yml`
   now creates the GitHub Release idempotently from the tag.
-- **Owner action (external, cannot be done from the CLI):** rotate the plaintext provider
-  tokens (GitHub / Azure / Sonar / Snyk / PyPI). With Trusted Publishing in place, any legacy
-  PyPI API token can be deleted outright instead of rotated.
+- **Owner action (external, cannot be done from the CLI):** provider credential hygiene is
+  tracked outside this repository. Publishing needs no long-lived credential: releases go
+  out through PyPI Trusted Publishing (OIDC), so any legacy API token can be deleted rather
+  than rotated.
 - **Owner action (push approval):** the 2026-08-05 increment is committed locally only. The
   new `cross-platform` CI job has never executed remotely, so its green state is unverified;
   it is intentionally *not* a required status check. After pushing and seeing it pass, decide

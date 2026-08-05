@@ -42,6 +42,9 @@ configuration.
   pipeline (Semgrep, CodeQL, Bandit, Trivy, KICS, pip-audit, Gitleaks, Dependency Review,
   actionlint), and OpenSSF Scorecard analysis. The build/lint/test, cross-platform, and
   security jobs are required status checks on `master`.
+- Architecture decision records in [`docs/adr/`](docs/adr/README.md), including the two that
+  define this project's boundary: the validator stays engine-agnostic (ADR-0001) and the CI
+  gate consumes its JSON rather than embedding enforcement (ADR-0004).
 - Contribution guidance for safe rule additions, a code of conduct, and issue/PR
   templates.
 - A CI integration template in `examples/`.

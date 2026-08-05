@@ -2,16 +2,17 @@
 
 ## Supported Versions
 
-`appsec-rules-pack` is published on PyPI. Security fixes target the current `0.2.x`
+`appsec-rules-pack` is published on PyPI. Security fixes target the current `0.3.x`
 release line and `master`.
 
 | Version | Supported |
 | ------- | --------- |
-| 0.2.x   | ✅        |
+| 0.3.x   | ✅        |
+| 0.2.x   | ❌        |
 | 0.1.x   | ❌        |
 
-Earlier `0.1.x` builds and pre-release commits are not maintained; upgrade to the
-latest `0.2.x` release.
+Earlier builds and pre-release commits are not maintained; upgrade to the latest
+`0.3.x` release.
 
 ## Reporting a Vulnerability
 
