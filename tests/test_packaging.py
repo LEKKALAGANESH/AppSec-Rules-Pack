@@ -2,26 +2,17 @@
 
 from __future__ import annotations
 
-import subprocess
-import sys
 from pathlib import Path
+
+from helpers import run_python
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_package_builds_wheel(tmp_path: Path) -> None:
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "build",
-            "--outdir",
-            str(tmp_path),
-            str(REPO_ROOT),
-        ],
-        capture_output=True,
-        text=True,
-        check=False,
+    result = run_python(
+        ["-m", "build", "--outdir", str(tmp_path), str(REPO_ROOT)],
+        cwd=REPO_ROOT,
     )
 
     assert result.returncode == 0, result.stdout + result.stderr

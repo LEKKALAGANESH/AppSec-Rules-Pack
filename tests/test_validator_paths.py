@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-import os
-import subprocess
-import sys
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
 import pytest
+from helpers import run_python
 from typer.testing import CliRunner
 
 from appsec_rules_pack.cli import app
@@ -330,15 +328,11 @@ def test_cli_json_output_fail_on_warnings() -> None:
 
 def test_module_entry_point_runs_help() -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    env = {**os.environ, "PYTHONPATH": str(repo_root / "src")}
-    result = subprocess.run(
-        [sys.executable, "-m", "appsec_rules_pack", "--help"],
-        capture_output=True,
-        text=True,
-        check=False,
+    result = run_python(
+        ["-m", "appsec_rules_pack", "--help"],
         cwd=repo_root,
-        env=env,
+        extra_env={"PYTHONPATH": str(repo_root / "src")},
     )
 
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stderr
     assert "validate" in result.stdout
