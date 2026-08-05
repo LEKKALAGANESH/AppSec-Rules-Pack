@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+- Fixed a portability defect in the test suite. Subprocess output was decoded with the
+  platform's locale encoding, so the CLI entry-point test failed on Windows (cp1252)
+  whenever the child process emitted UTF-8; `subprocess.run` swallowed the decode error
+  and left `stdout` as `None`, which surfaced as a misleading `TypeError`. Both ends are
+  now pinned to UTF-8 through a shared `tests/helpers.py`, with regression tests. No
+  runtime or packaging behaviour changed.
+- Added a `cross-platform` CI job running the suite on Ubuntu and Windows, so
+  platform-dependent defects fail in CI instead of only on a maintainer's machine. The
+  existing `Lint, test, and validate rules` job (and therefore the required status check
+  used by branch protection) is unchanged.
+
 ## v0.2.0 - 2026-06-03
 
 - Added derivation-only export and reporting commands (engine-agnostic, see ADR-0001):

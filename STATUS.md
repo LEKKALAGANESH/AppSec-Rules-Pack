@@ -35,6 +35,16 @@
 
 ## Last Increment
 
+- 2026-08-05 (test portability + cross-platform CI): fixed a defect that made the suite red
+  on Windows while green on CI. Two tests shelled out with `subprocess.run(text=True)` and no
+  explicit encoding, so the parent decoded with the platform locale (cp1252) while the child
+  emitted UTF-8; the decode error was swallowed inside `subprocess`, leaving `stdout` as
+  `None` and surfacing as a misleading `TypeError`. Both call sites now go through a shared
+  `tests/helpers.py` that pins UTF-8 on both ends, with regression tests in
+  `tests/test_helpers.py`. Added a `cross-platform` CI job (Ubuntu + Windows) so this class of
+  defect fails remotely; the required status check `Lint, test, and validate rules` was
+  deliberately left untouched, because renaming it would silently disable branch protection.
+  Suite is now 98 tests at 92.73% coverage. **Not yet pushed** — awaiting owner approval.
 - 2026-06-03 (v0.2.0 published): cut and published `appsec-rules-pack` 0.2.0 to PyPI via OIDC
   Trusted Publishing. Bumped the package and rules-pack content version to 0.2.0, moved the
   schema `$id` to the v0.2.0 tag (per the schema's versioning policy), regenerated the
@@ -86,6 +96,15 @@
 
 ## Checks
 
+- 2026-08-05 (local, Windows 11 / Python 3.12.10): full end-to-end battery green —
+  `ruff` clean; 98 tests at 92.73% coverage (gate 90%); `validate rules --require-examples
+  --fail-on-warnings` = 1 file, 19 rules, 0 errors, 0 warnings; JSON report keys stable;
+  `exports/` regenerated with no content drift; `report coverage` = 19 rules with the three
+  required framework mappings at 100% and the optional `owasp_top_10_2025` at 84%;
+  `python -m build` + `twine check` PASSED for wheel and sdist; the built wheel installed
+  into a clean venv exposes a working `appsec-rules` console script with the schema bundled;
+  exit codes 0 (valid pack) and 1 (invalid pack) confirmed. Prior "96 tests green" entries
+  were measured on CI (Ubuntu); the same suite was red on Windows until this increment.
 - 2026-06-03 (v0.2.0 release): local suite green — 96 tests at 92.73% coverage (gate 90%),
   `ruff` clean, `validate rules --require-examples --fail-on-warnings` = 1 file, 19 rules,
   0 errors, 0 warnings, CLI `--version` = 0.2.0, `exports/` regenerated with no drift. The
@@ -152,6 +171,10 @@
 - **Owner action (external, cannot be done from the CLI):** rotate the plaintext provider
   tokens (GitHub / Azure / Sonar / Snyk / PyPI). With Trusted Publishing in place, any legacy
   PyPI API token can be deleted outright instead of rotated.
+- **Owner action (push approval):** the 2026-08-05 increment is committed locally only. The
+  new `cross-platform` CI job has never executed remotely, so its green state is unverified;
+  it is intentionally *not* a required status check. After pushing and seeing it pass, decide
+  whether to add `Cross-platform tests (windows-latest)` to the `master-protection` ruleset.
 - Defer the v1.0 cut (MEL-013) until the expanded contract (new categories, rule lifecycle,
   optional 2025 mapping, and exports) has had real-world use.
 
