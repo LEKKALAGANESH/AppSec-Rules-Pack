@@ -18,6 +18,32 @@
 5. Define the exception requirement and maximum exception duration.
 6. Run validation and tests.
 
+## Framework Mapping Convention
+
+Mappings are assigned **by topic**, not by CWE membership. A rule maps to the category
+whose subject matter it addresses, even when one of its CWEs is listed under a different
+category in that framework's own CWE table. For example `APPSEC-SESSION-001` maps to
+`A07:2025` although CWE-614 appears under `A02:2025`.
+
+Consequences worth knowing before you add a mapping:
+
+- Prefer **one** category per framework. Reach for a second only when the rule genuinely
+  covers two distinct subjects, not to capture every CWE's official home.
+- `mappings.owasp_top_10_2025` is **optional**. Leave it out when no category matches the
+  rule's topic without stretching. An absent mapping is honest; a stretched one is not.
+- Mappings are evidence aids for review. They are not a claim of conformance to ASVS,
+  the API Top 10, the Top 10, or NIST SSDF.
+
+Editing `rules/appsec-baseline.yaml` invalidates the checked-in `exports/` artifacts.
+Regenerate all three and commit them with the rule change, or the byte-comparison tests
+in `tests/test_cli_export_output.py` will fail:
+
+```powershell
+python -m appsec_rules_pack export index rules/appsec-baseline.yaml --output exports/appsec-baseline.index.json
+python -m appsec_rules_pack export semgrep rules/appsec-baseline.yaml --output exports/semgrep/appsec-baseline.semgrep.yaml
+python -m appsec_rules_pack export sarif rules/appsec-baseline.yaml --output exports/sarif/appsec-baseline.sarif.json
+```
+
 ## Severity Model
 
 - `critical`: direct path to unauthorized privileged access, remote code execution, or

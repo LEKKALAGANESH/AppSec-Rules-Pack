@@ -35,6 +35,17 @@
 
 ## Last Increment
 
+- 2026-08-05 (v0.3.0 **published**): the signed `v0.3.0` tag drove `publish-pypi.yml` end to
+  end — build, CycloneDX SBOM, SLSA build-provenance attestation, PyPI publish via OIDC
+  Trusted Publishing, and a GitHub Release. PyPI serves `appsec-rules-pack` 0.3.0 (wheel +
+  sdist); the Release carries the wheel, sdist, SBOM, and — new in this version — the
+  baseline pack itself as `appsec-baseline.yaml` (45,090 bytes). The remote reports the tag
+  as `verified: true`. Validated as an end user afterwards, not merely by a green workflow:
+  from an empty directory, `pip install appsec-rules-pack` gave 0.3.0, the README's exact
+  `curl` URL fetched the baseline from the Release, and the installed CLI validated it at
+  19 rules / 0 errors / 0 warnings, then produced a coverage report and a SARIF catalog.
+  The `Python 3.13 compatibility` check was added to the ruleset once it passed remotely,
+  bringing required status checks to 14.
 - 2026-08-05 (v0.3.0 prepared): bumped the package and pack version to 0.3.0. The schema
   `$id` deliberately **stays** at the v0.2.0 tag: its own `$comment` policy moves it only
   when the schema changes in a way that affects consumers, and `git diff v0.2.0..HEAD --

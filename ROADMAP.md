@@ -38,6 +38,9 @@ statement of intent, not a delivery commitment, and is kept consistent with
 - Tagged `v0.2.0` published to PyPI as `appsec-rules-pack` via OIDC Trusted Publishing
   (2026-06-03), with a CycloneDX SBOM and a SLSA build-provenance attestation attached to
   the GitHub Release.
+- Tagged `v0.3.0` published (2026-08-05). Each Release now also carries the baseline pack
+  itself as `appsec-baseline.yaml`, so consumers can pin a copy of the 19 rules without
+  cloning; the distribution still ships the validator and schema only.
 - Optional `owasp_top_10_2025` mapping field (additive, backward-compatible) populated on
   the rules where a 2025 category maps cleanly.
 - Rule lifecycle support: a `deprecated` status plus an optional `deprecation` block
