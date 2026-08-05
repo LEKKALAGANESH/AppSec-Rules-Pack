@@ -61,6 +61,43 @@ jobs:
           python -m pip install twine
           python -m twine check dist/*
 
+  # `requires-python = ">=3.12"` claims 3.13 works, and nothing exercised it. Kept out of
+  # the matrix below so the two cross-platform check names stay stable for the ruleset.
+  python-next:
+    name: Python 3.13 compatibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            pypi.org:443
+            files.pythonhosted.org:443
+
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install project with dev dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Run tests
+        run: python -m pytest
+
+      - name: Validate baseline rules pack (fail on warnings)
+        run: python -m appsec_rules_pack validate rules --require-examples --fail-on-warnings
+
   # Separate job on purpose: the `validate` job above is the required status check in the
   # `master-protection` ruleset, and adding a matrix to it would rename the check and
   # silently break branch protection. This job guards platform portability instead.

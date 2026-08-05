@@ -24,7 +24,7 @@ statement of intent, not a delivery commitment, and is kept consistent with
 - Semantic checks: duplicate IDs within a file and across a directory, exception
   window warnings, exception-policy consistency, framework mapping format validation,
   and sensitive-value detection.
-- 78 tests, a 90% coverage gate (currently ~94%), ruff linting, and a build check.
+- A test suite with a 95% coverage gate (currently ~97%), ruff linting, and a build check.
 - A hardened GitHub Actions CI/CD surface (least-privilege permissions, SHA-pinned
   actions): build/lint/test CI, a security pipeline, and OpenSSF Scorecard, running on
   the public GitHub remote and green on `master`.

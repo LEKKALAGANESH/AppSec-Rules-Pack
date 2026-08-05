@@ -80,5 +80,7 @@ branch = true
 source = ["appsec_rules_pack"]
 
 [tool.coverage.report]
-fail_under = 90
+# Raised from 90 once actual coverage settled above 97%. A gate far below the real
+# number permits a silent regression the size of the gap.
+fail_under = 95
 show_missing = true
