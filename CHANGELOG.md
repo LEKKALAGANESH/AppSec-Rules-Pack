@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+- Derived artifacts written with `--output` now use LF line endings on every platform.
+  `Path.write_text` translates `\n` to the platform separator, so `export index`,
+  `export semgrep`, `export sarif`, and `report coverage --output` produced entirely
+  CRLF files on Windows while the repository stores LF. The same command now yields
+  byte-identical output regardless of platform, which matters for anything that hashes
+  or diffs the generated evidence. Content is unchanged.
+- `report coverage` now warns on stderr when the pack yields zero rules. The report is
+  derived without schema validation, so a pack whose `rules` key is missing or malformed
+  produced a clean-looking `0/0` report with no signal. The exit code is deliberately
+  unchanged (still 0): judging pack structure is `validate`'s job.
+- Added tests for the CLI `--output` write path of every export. `export semgrep --output`
+  and `export sarif --output` had no test: the drift tests compare the committed artifact
+  against the in-memory builder, so a break in the file-writing path would not have failed
+  them. The new tests compare raw bytes against the committed artifacts.
 - Fixed a portability defect in the test suite. Subprocess output was decoded with the
   platform's locale encoding, so the CLI entry-point test failed on Windows (cp1252)
   whenever the child process emitted UTF-8; `subprocess.run` swallowed the decode error

@@ -35,6 +35,15 @@
 
 ## Last Increment
 
+- 2026-08-05 (reproducible exports + untested write paths): made every `--output` write
+  emit LF on all platforms (`Path.write_text` was translating to CRLF on Windows), so the
+  documented regeneration commands produce byte-identical artifacts everywhere. Verified
+  with `git hash-object --no-filters` against the committed blobs: identical. Added tests
+  for the CLI `--output` path of all three exports — `export semgrep --output` and
+  `export sarif --output` had none, because the drift tests compare the committed file to
+  the in-memory builder and never touch the writer. `report coverage` now warns on stderr
+  when a pack yields zero rules, instead of printing a healthy-looking `0/0`; exit code
+  intentionally unchanged. Suite is now 106 tests at 94.36% coverage.
 - 2026-08-05 (test portability + cross-platform CI): fixed a defect that made the suite red
   on Windows while green on CI. Two tests shelled out with `subprocess.run(text=True)` and no
   explicit encoding, so the parent decoded with the platform locale (cp1252) while the child
