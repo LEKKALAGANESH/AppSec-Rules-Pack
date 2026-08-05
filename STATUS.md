@@ -35,6 +35,14 @@
 
 ## Last Increment
 
+- 2026-08-05 (semantic-check degradation): covered how the semantic checks behave when the
+  schema has already rejected the payload — reachable on every invalid pack, since both run
+  over the same payload. Each check skips rules it cannot read (non-dict entries, non-string
+  IDs, non-mapping `exceptions`/`mappings`) rather than raising, which is what lets one
+  `validate` run report all schema errors at once instead of aborting on the first malformed
+  rule. A new semantic check written without a type guard would previously have crashed the
+  whole run on any invalid pack with nothing to catch it: every existing fixture keeps
+  `rules` a list of dicts. Suite is now 121 tests at 97.42% coverage; no behaviour changed.
 - 2026-08-05 (untested behaviour pinned down): added tests for two behaviours that had no
   coverage at all. Directory validation keeps going when one YAML file is unparseable —
   it reports the parse error, still validates the rest, and still counts their rules; a

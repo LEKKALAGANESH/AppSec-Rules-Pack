@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   derived without schema validation, so a pack whose `rules` key is missing or malformed
   produced a clean-looking `0/0` report with no signal. The exit code is deliberately
   unchanged (still 0): judging pack structure is `validate`'s job.
+- Pinned down how the semantic checks behave on payloads the schema already rejected.
+  Schema validation and the semantic checks run over the same payload, so every semantic
+  check sees malformed input whenever a pack is invalid; each one skips what it cannot
+  read, which is what lets a single `validate` run report all the schema errors at once
+  instead of dying on the first malformed rule. Suite is now 121 tests at 97.42% coverage.
 - Pinned down two previously untested behaviours. Directory validation now has tests
   proving that one unparseable YAML file does not abort the scan: the other files are
   still validated and their rules still counted, so a single broken file cannot silently
