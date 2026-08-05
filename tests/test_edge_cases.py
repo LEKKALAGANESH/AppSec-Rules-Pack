@@ -124,3 +124,47 @@ def test_directory_with_valid_and_empty_file_fails(tmp_path: Path) -> None:
     assert result.exit_code == 1
     assert "2 files" in result.output
     assert "empty.yaml" in result.output
+
+
+def test_unparseable_file_does_not_abort_the_rest_of_the_directory(tmp_path: Path) -> None:
+    """One malformed file must not stop the others from being validated.
+
+    Directory validation is the documented way to check a rules directory in CI. If a
+    YAML syntax error aborted the scan, a single broken file would hide every other
+    file's findings and the report would be silently incomplete.
+    """
+
+    (tmp_path / "valid.yaml").write_text(VALID_PACK, encoding="utf-8")
+    (tmp_path / "broken.yaml").write_text("pack: [unterminated\n", encoding="utf-8")
+
+    result = runner.invoke(app, ["validate", str(tmp_path)])
+
+    assert result.exit_code == 1
+    assert "could not parse YAML file" in result.output
+    assert "broken.yaml" in result.output
+    # The valid file was still parsed and its rule counted, rather than being skipped.
+    assert "2 files, 1 rule" in result.output
+
+
+def test_unparseable_file_is_isolated_in_json_output(tmp_path: Path) -> None:
+    import json
+
+    (tmp_path / "valid.yaml").write_text(VALID_PACK, encoding="utf-8")
+    (tmp_path / "broken.yaml").write_text("pack: [unterminated\n", encoding="utf-8")
+
+    result = runner.invoke(app, ["validate", str(tmp_path), "--format", "json"])
+
+    assert result.exit_code == 1
+    report = json.loads(result.output)
+    assert report["summary"] == {
+        "files": 2,
+        "rules": 1,
+        "errors": 1,
+        "warnings": 0,
+        "ok": False,
+    }
+
+    per_file = {entry["path"]: entry for entry in report["files"]}
+    assert per_file["valid.yaml"]["rules"] == 1
+    assert per_file["valid.yaml"]["errors"] == 0
+    assert per_file["broken.yaml"]["errors"] == 1
