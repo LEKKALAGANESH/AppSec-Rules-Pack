@@ -35,6 +35,17 @@
 
 ## Last Increment
 
+- 2026-08-05 (untested behaviour pinned down): added tests for two behaviours that had no
+  coverage at all. Directory validation keeps going when one YAML file is unparseable —
+  it reports the parse error, still validates the rest, and still counts their rules; a
+  regression there would let one broken file silently truncate a CI report. The
+  derivation-only exports now have a degradation contract under malformed or partial packs
+  (they run without schema validation, so this is reachable): unknown severity falls back
+  to `warning` with no invented `security-severity`, a missing pack version falls back to
+  `0.0.0`, and non-list mappings are skipped rather than raising. `reporter.py`,
+  `sarif_export.py`, and `semgrep_scaffold.py` are now at 100% coverage; the suite is 114
+  tests at 96.20% overall. No behaviour changed — these tests describe what already
+  happens, verified by running it first.
 - 2026-08-05 (reproducible exports + untested write paths): made every `--output` write
   emit LF on all platforms (`Path.write_text` was translating to CRLF on Windows), so the
   documented regeneration commands produce byte-identical artifacts everywhere. Verified

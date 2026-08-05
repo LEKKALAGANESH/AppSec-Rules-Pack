@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   derived without schema validation, so a pack whose `rules` key is missing or malformed
   produced a clean-looking `0/0` report with no signal. The exit code is deliberately
   unchanged (still 0): judging pack structure is `validate`'s job.
+- Pinned down two previously untested behaviours. Directory validation now has tests
+  proving that one unparseable YAML file does not abort the scan: the other files are
+  still validated and their rules still counted, so a single broken file cannot silently
+  hide the rest of a report. The derivation-only exports (`export sarif`, `export semgrep`,
+  `report coverage`) now have tests for malformed or partial packs — they run without
+  schema validation, so their degradation behaviour is a contract: skip what cannot be
+  read, fall back to documented defaults, never raise or invent content.
 - Added tests for the CLI `--output` write path of every export. `export semgrep --output`
   and `export sarif --output` had no test: the drift tests compare the committed artifact
   against the in-memory builder, so a break in the file-writing path would not have failed
