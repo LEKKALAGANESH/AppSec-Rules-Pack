@@ -274,7 +274,7 @@ def export_index(
 
     if output is not None:
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(document, encoding="utf-8")
+        output.write_text(document, encoding="utf-8", newline="\n")
         typer.echo(f"Wrote index for {_plural(len(rule_files), 'file', 'files')} to {output}.")
         return
 
@@ -303,7 +303,7 @@ def export_semgrep(
 
     if output is not None:
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(document, encoding="utf-8")
+        output.write_text(document, encoding="utf-8", newline="\n")
         typer.echo(
             f"Wrote Semgrep scaffold for {_plural(len(rule_files), 'file', 'files')} to {output}."
         )
@@ -333,7 +333,7 @@ def export_sarif(
 
     if output is not None:
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(document, encoding="utf-8")
+        output.write_text(document, encoding="utf-8", newline="\n")
         typer.echo(
             f"Wrote SARIF rule-catalog for {_plural(len(rule_files), 'file', 'files')} to {output}."
         )
@@ -360,11 +360,22 @@ def report_coverage(
 
     coverage = build_coverage_from_files(list(rule_files))
 
+    if coverage["rules"] == 0:
+        # The report is derived without schema validation, so a pack whose `rules` key is
+        # missing or malformed still produces a clean-looking 0/0 report. Say so on stderr
+        # rather than letting an empty report read as a healthy one. The exit code stays 0:
+        # reporting is derivation, and `validate` is what judges pack structure.
+        typer.echo(
+            f"Warning: no rules found in {rules_path}; the coverage report is empty. "
+            "Run `validate` to check the pack structure.",
+            err=True,
+        )
+
     if output_format is OutputFormat.json:
         document = json.dumps(coverage, indent=2) + "\n"
         if output is not None:
             output.parent.mkdir(parents=True, exist_ok=True)
-            output.write_text(document, encoding="utf-8")
+            output.write_text(document, encoding="utf-8", newline="\n")
             typer.echo(f"Wrote coverage report to {output}.")
             return
         typer.echo(document, nl=False)

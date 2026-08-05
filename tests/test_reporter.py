@@ -15,6 +15,25 @@ BASELINE_PATH = Path("rules/appsec-baseline.yaml")
 runner = CliRunner()
 
 
+def test_report_coverage_warns_when_pack_yields_no_rules(tmp_path: Path) -> None:
+    """A malformed pack used to produce a clean-looking 0/0 report with no signal.
+
+    `report coverage` derives from mapping metadata without schema validation, so a
+    pack whose `rules` key is not a list still reports successfully. It now says so on
+    stderr. The exit code stays 0 on purpose: judging pack structure is `validate`'s job,
+    and changing it would break callers that treat a non-zero exit as a mapping failure.
+    """
+
+    malformed = tmp_path / "malformed.yaml"
+    malformed.write_text("pack:\n  id: demo\nrules: not-a-list\n", encoding="utf-8")
+
+    result = runner.invoke(app, ["report", "coverage", str(malformed)])
+
+    assert result.exit_code == 0
+    assert "no rules found" in result.output
+    assert "Mapping coverage for 0 rules" in result.output
+
+
 def test_build_coverage_summary() -> None:
     coverage = build_coverage_from_files([BASELINE_PATH])
 
