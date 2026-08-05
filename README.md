@@ -121,6 +121,12 @@ pip install appsec-rules-pack
 This installs the `appsec-rules` console script. Pin to a reviewed version
 (for example `appsec-rules-pack==0.2.0`) when using it in a CI quality gate.
 
+**What the distribution contains:** the validator, the CLI, and the JSON Schema. It does
+not ship a rules pack — the CLI validates whatever path you point it at. The baseline pack
+of 19 rules lives in this repository at
+[`rules/appsec-baseline.yaml`](rules/appsec-baseline.yaml); copy it into your project as a
+starting point, or write your own pack using the example below.
+
 ### From source (development)
 
 ```powershell
@@ -138,7 +144,77 @@ python -m venv .venv
 If the dependencies already exist in the active Python environment, the validator can
 also be run directly with `PYTHONPATH=src`.
 
+## Your First Rules Pack
+
+A pack is a `pack` block plus one or more `rules`. This is a complete, valid minimal pack —
+copy it, run `appsec-rules validate` on it, then grow it. Every field shown is required; the
+full contract is in
+[`appsec-rule.schema.json`](src/appsec_rules_pack/schemas/appsec-rule.schema.json), and the
+19 baseline rules in [`rules/appsec-baseline.yaml`](rules/appsec-baseline.yaml) are worked
+examples.
+
+<!-- readme-example:minimal-pack (validated by tests/test_readme_example.py) -->
+
+```yaml
+pack:
+  id: my-pack
+  name: My Rules Pack
+  version: 0.1.0
+  mode: advisory
+  owner: appsec
+  description: A minimal rules pack to start from.
+
+rules:
+  - id: APPSEC-EXAMPLE-001
+    title: Require controlled error handling
+    description: Verify that invalid user input returns controlled errors without stack traces.
+    severity: medium
+    category: configuration
+    status: enabled
+    enforcement: advisory
+    targets:
+      - api
+    mappings:
+      owasp_asvs:
+        - V14.4
+      owasp_api_top_10_2023:
+        - API8:2023
+      cwe:
+        - CWE-209
+      nist_ssdf:
+        - PW.7
+    evidence:
+      required:
+        - Error handling path returns a documented response shape.
+      signals:
+        - Negative tests assert controlled error messages for invalid input.
+    match:
+      type: review
+      includes:
+        - API handlers that process untrusted input.
+      excludes:
+        - Local developer-only scripts that are not shipped.
+    remediation:
+      guidance: Replace raw exception output with a controlled error contract.
+      validation:
+        - Run negative tests for invalid input and malformed requests.
+    exceptions:
+      allowed: true
+      max_days: 30
+      required_fields:
+        - owner
+        - justification
+        - expires_at
+```
+
+Note the shapes that are easy to guess wrong: `evidence` and `match` are objects (not
+lists), `remediation` needs `guidance`, and `required_fields` accepts only `owner`,
+`justification`, `expires_at`, `compensating_control`, and `validation_plan`.
+
 ## Usage
+
+The examples below use `rules/appsec-baseline.yaml`, which exists in **this repository**.
+If you installed from PyPI, point the CLI at your own rules file or directory instead.
 
 Validate the baseline rules pack:
 
