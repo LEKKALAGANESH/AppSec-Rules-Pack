@@ -60,3 +60,51 @@ jobs:
         run: |
           python -m pip install twine
           python -m twine check dist/*
+
+  # Separate job on purpose: the `validate` job above is the required status check in the
+  # `master-protection` ruleset, and adding a matrix to it would rename the check and
+  # silently break branch protection. This job guards platform portability instead.
+  cross-platform:
+    name: Cross-platform tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      # harden-runner's egress policy targets Linux runners; keep it where it applies
+      # instead of failing the Windows leg.
+      - name: Harden runner
+        if: runner.os == 'Linux'
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            pypi.org:443
+            files.pythonhosted.org:443
+
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install project with dev dependencies
+        run: python -m pip install -e ".[dev]"
+
+      # No coverage gate here: the `validate` job owns it. This leg exists to catch
+      # platform-dependent behaviour, such as subprocess output decoded with the
+      # machine's locale encoding instead of an explicit one.
+      - name: Run tests
+        run: python -m pytest
+
+      - name: Validate baseline rules pack (fail on warnings)
+        run: python -m appsec_rules_pack validate rules --require-examples --fail-on-warnings
