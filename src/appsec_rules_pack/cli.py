@@ -111,6 +111,23 @@ def _format_file_issue(base_path: Path, file_path: Path, issue: ValidationIssue)
     return f"{_display_path(base_path, file_path)}: {_format_issue(issue)}"
 
 
+def _write_document(output: Path, document: str) -> None:
+    """Write a derived document, reporting write failures as an actionable CLI error.
+
+    Pointing ``--output`` at an existing directory, or at any path that cannot be
+    written, used to escape as a raw Python traceback (``PermissionError`` on Windows,
+    ``IsADirectoryError`` on POSIX). The caller keeps its own success message.
+    """
+
+    try:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(document, encoding="utf-8", newline="\n")
+    except OSError as error:
+        reason = error.strerror or str(error)
+        typer.echo(f"Write failed: cannot write to {output}: {reason}.", err=True)
+        raise typer.Exit(code=1) from error
+
+
 def _iter_rule_files(path: Path) -> tuple[Path, ...]:
     if path.is_file():
         return (path,)
@@ -273,8 +290,7 @@ def export_index(
     document = json.dumps(index, indent=2) + "\n"
 
     if output is not None:
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(document, encoding="utf-8", newline="\n")
+        _write_document(output, document)
         typer.echo(f"Wrote index for {_plural(len(rule_files), 'file', 'files')} to {output}.")
         return
 
@@ -302,8 +318,7 @@ def export_semgrep(
     document = SEMGREP_HEADER + body
 
     if output is not None:
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(document, encoding="utf-8", newline="\n")
+        _write_document(output, document)
         typer.echo(
             f"Wrote Semgrep scaffold for {_plural(len(rule_files), 'file', 'files')} to {output}."
         )
@@ -332,8 +347,7 @@ def export_sarif(
     document = json.dumps(sarif, indent=2) + "\n"
 
     if output is not None:
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(document, encoding="utf-8", newline="\n")
+        _write_document(output, document)
         typer.echo(
             f"Wrote SARIF rule-catalog for {_plural(len(rule_files), 'file', 'files')} to {output}."
         )
@@ -374,8 +388,7 @@ def report_coverage(
     if output_format is OutputFormat.json:
         document = json.dumps(coverage, indent=2) + "\n"
         if output is not None:
-            output.parent.mkdir(parents=True, exist_ok=True)
-            output.write_text(document, encoding="utf-8", newline="\n")
+            _write_document(output, document)
             typer.echo(f"Wrote coverage report to {output}.")
             return
         typer.echo(document, nl=False)
