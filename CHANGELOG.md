@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+- An unwritable `--output` now reports an actionable error instead of a traceback.
+  Pointing it at an existing directory escaped as a raw `PermissionError` (Windows) or
+  `IsADirectoryError` (POSIX); the CLI now prints `Write failed: cannot write to <path>:
+  <reason>.` and exits 1. Covers `export index`, `export semgrep`, `export sarif`, and
+  `report coverage --output`.
+- Identical schema errors are no longer reported more than once. jsonschema raises one
+  error per missing required property while the rendered message names every missing
+  field, so a rule with an empty `match` block printed
+  `missing required fields: 'type', 'includes', 'excludes'` three times and counted three
+  errors. The same message at the same path is now reported once; distinct locations are
+  unaffected.
+- README: added a complete minimal rules pack that a new user can copy and validate, and
+  stated plainly that the distribution ships the validator and schema but no rules pack —
+  the baseline of 19 rules lives in the repository. The documented usage examples assume a
+  checkout, which was not said before, so the first command a new PyPI user ran failed with
+  "path does not exist". The example is validated by `tests/test_readme_example.py`, so it
+  cannot drift out of sync with the schema.
+
 - Derived artifacts written with `--output` now use LF line endings on every platform.
   `Path.write_text` translates `\n` to the platform separator, so `export index`,
   `export semgrep`, `export sarif`, and `report coverage --output` produced entirely

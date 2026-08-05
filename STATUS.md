@@ -35,6 +35,29 @@
 
 ## Last Increment
 
+- 2026-08-05 (first-use experience, found by using the CLI as a new user): installed the
+  published package into a clean venv and followed only the public docs. Three defects that
+  no automated test caught. (1) The first documented command failed: `validate
+  rules/appsec-baseline.yaml` does not exist for someone who installed from PyPI, because
+  the distribution ships no rules pack — README now says so and separates repo-relative
+  examples from a PyPI install. (2) There was no copyable example of a valid pack; writing
+  one from the README's prose produced eight schema errors, since the prose describes
+  concepts (`evidence`, `match`, `remediation`) and not their shapes. README now carries a
+  complete minimal pack, validated by `tests/test_readme_example.py` so it cannot drift.
+  (3) A rule with an empty `match` printed the same error three times and counted three
+  errors; identical schema errors at the same path are now reported once.
+  Exploratory testing then found that an unwritable `--output` (for example an existing
+  directory) escaped as a Python traceback; all four writing commands now emit a clean
+  message and exit 1. Suite is 130 tests at 97.46% coverage.
+- 2026-08-05 (repository visibility, root cause of a red security pipeline): the repository
+  had reverted to **private** — a recurrence of HF-09. Code scanning requires a public
+  repository or GHAS, so every SARIF upload failed (Semgrep, CodeQL, Trivy x3, KICS) and
+  OpenSSF Scorecard could not read commits. Workflow permissions were never the problem
+  (`security-events: write` was correctly declared throughout). Anonymous visitors got a 404
+  while the landing page and the PyPI project links kept pointing at the repository. Made
+  public again with owner authorization; **Security CI/CD and Scorecard are now green**.
+  Neither workflow is a required check, which is why it went unnoticed.
+
 - 2026-08-05 (semantic-check degradation): covered how the semantic checks behave when the
   schema has already rejected the payload — reachable on every invalid pack, since both run
   over the same payload. Each check skips rules it cannot read (non-dict entries, non-string
