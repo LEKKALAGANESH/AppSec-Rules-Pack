@@ -303,8 +303,9 @@ def validate(
     file_summary = _plural(len(rule_files), "file", "files")
     verdict = "passed" if passed else "failed"
     typer.echo(
-        f"Validation {verdict}: {file_summary}, {rule_count} rules, "
-        f"{error_count} errors, {warning_count} warnings."
+        f"Validation {verdict}: {file_summary}, {_plural(rule_count, 'rule', 'rules')}, "
+        f"{_plural(error_count, 'error', 'errors')}, "
+        f"{_plural(warning_count, 'warning', 'warnings')}."
     )
     if not passed:
         raise typer.Exit(code=1)

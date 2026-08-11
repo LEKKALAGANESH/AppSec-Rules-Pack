@@ -150,7 +150,7 @@ def test_cli_validate_accepts_single_file() -> None:
     result = runner.invoke(app, ["validate", str(PASS_FIXTURE_PATH)])
 
     assert result.exit_code == 0
-    assert "Validation passed: 1 file, 1 rules, 0 errors, 0 warnings." in result.output
+    assert "Validation passed: 1 file, 1 rule, 0 errors, 0 warnings." in result.output
 
 
 def test_cli_validate_single_file_reports_file_name_and_clear_error() -> None:
@@ -166,7 +166,7 @@ def test_cli_validate_accepts_directory() -> None:
     result = runner.invoke(app, ["validate", str(PASS_FIXTURES_DIR)])
 
     assert result.exit_code == 0
-    assert "Validation passed: 1 file, 1 rules, 0 errors, 0 warnings." in result.output
+    assert "Validation passed: 1 file, 1 rule, 0 errors, 0 warnings." in result.output
 
 
 def test_cli_validate_warn_fixture_passes_without_fail_on_warnings() -> None:
@@ -177,7 +177,7 @@ def test_cli_validate_warn_fixture_passes_without_fail_on_warnings() -> None:
         "exception-window-warning.yaml: WARNING rules.0.exceptions.max_days: "
         f"{EXCEPTION_WINDOW_WARNING}"
     ) in result.output
-    assert "Validation passed: 1 file, 1 rules, 0 errors, 1 warnings." in result.output
+    assert "Validation passed: 1 file, 1 rule, 0 errors, 1 warning." in result.output
 
 
 def test_cli_validate_warn_fixture_fails_with_fail_on_warnings() -> None:
@@ -187,7 +187,7 @@ def test_cli_validate_warn_fixture_fails_with_fail_on_warnings() -> None:
     )
 
     assert result.exit_code == 1
-    assert "Validation failed: 1 file, 1 rules, 0 errors, 1 warnings." in result.output
+    assert "Validation failed: 1 file, 1 rule, 0 errors, 1 warning." in result.output
 
 
 def test_cli_validate_cross_file_directory_reports_duplicate_across_files() -> None:
@@ -198,7 +198,7 @@ def test_cli_validate_cross_file_directory_reports_duplicate_across_files() -> N
         "second-pack.yaml: ERROR rules.0.id: duplicate rule id 'APPSEC-CROSS-001'; "
         "first seen in first-pack.yaml at rules.0"
     ) in result.output
-    assert "Validation failed: 2 files, 2 rules, 1 errors, 0 warnings." in result.output
+    assert "Validation failed: 2 files, 2 rules, 1 error, 0 warnings." in result.output
 
 
 def test_cli_validate_directory_reports_file_and_clear_error() -> None:

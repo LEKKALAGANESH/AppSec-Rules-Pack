@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stayed 0, and the named file was never created. The text report now lands in the
   file exactly like the JSON variant, with a `Wrote coverage report to <path>.`
   confirmation.
+- The validation summary now pluralizes every count: `1 file, 1 rule, 0 errors,
+  1 warning` instead of `1 rules`/`1 errors`/`1 warnings`. The file count was already
+  handled; rules, errors, and warnings were not. Text output only — the JSON report
+  is unchanged.
 
 ## v0.3.0 - 2026-08-05
 

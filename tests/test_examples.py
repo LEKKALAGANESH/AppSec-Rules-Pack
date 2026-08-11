@@ -115,7 +115,7 @@ def test_cli_require_examples_warns_on_rule_without_examples() -> None:
         "WARNING rules.0.examples: enabled rule should include compliant and violating examples"
         in result.output
     )
-    assert "0 errors, 1 warnings" in result.output
+    assert "0 errors, 1 warning" in result.output
 
 
 def test_cli_require_examples_with_fail_on_warnings_exits_nonzero() -> None:
@@ -125,4 +125,4 @@ def test_cli_require_examples_with_fail_on_warnings_exits_nonzero() -> None:
     )
 
     assert result.exit_code == 1
-    assert "Validation failed: 1 file, 1 rules, 0 errors, 1 warnings." in result.output
+    assert "Validation failed: 1 file, 1 rule, 0 errors, 1 warning." in result.output
