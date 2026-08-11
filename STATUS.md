@@ -53,7 +53,7 @@ Last measured 2026-08-11 on Windows 11 with Python 3.12.10, and confirmed on CI:
 | `python -m build` + `twine check` | wheel and sdist PASSED |
 | Clean-venv install of the built wheel | `appsec-rules` console script works, schema bundled |
 | Exit codes | 0 on a valid pack, non-zero on an invalid one |
-| Remote CI | `CI`, `Security CI/CD`, and `OpenSSF Scorecard` green on `master` |
+| Remote CI | `CI` and `OpenSSF Scorecard` green on `master`; `Security CI/CD` green after the SARIF-upload/`actions: read` and Gitleaks/`pull-requests: read` permission fix in v0.3.1 |
 
 The published release was also validated as an end user: from an empty directory,
 `pip install appsec-rules-pack` followed by the documented download of the baseline from the

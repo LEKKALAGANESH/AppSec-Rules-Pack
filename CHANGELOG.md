@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.3.1 - 2026-08-11
 
+- The `Security CI/CD` pipeline now passes on pull requests and scheduled runs. Five
+  SARIF-uploading jobs (Semgrep, both Trivy scans, KICS, Trivy secrets) were missing
+  `actions: read`, which `github/codeql-action/upload-sarif` needs to read the workflow
+  run — the scans succeeded but the upload step failed. The Gitleaks history job was
+  missing `pull-requests: read`, so its `GET /pulls/{n}/commits` returned 403 on pull
+  requests. Both are minimal read-only permission additions; the failures were workflow
+  configuration gaps, not findings.
 - Unreadable rule files now fail with an actionable error instead of a raw Python
   traceback, across every command. A file that is not valid UTF-8 (for example one
   saved as UTF-16 by legacy PowerShell) escaped as an uncaught `UnicodeDecodeError`

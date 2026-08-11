@@ -42,7 +42,9 @@ on:
   merge_group:
 
 # Least-privilege top level: read-only. Jobs that upload SARIF elevate to
-# `security-events: write` themselves, and CodeQL adds `actions: read`.
+# `security-events: write` and `actions: read` themselves — the
+# codeql-action `upload-sarif` reads the workflow run via the Actions API, so
+# `actions: read` is required for the upload to succeed, not only for CodeQL.
 permissions:
   contents: read
 
@@ -63,6 +65,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read # upload-sarif reads the workflow run via the Actions API
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
@@ -188,6 +191,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read # upload-sarif reads the workflow run via the Actions API
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
@@ -233,6 +237,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read # upload-sarif reads the workflow run via the Actions API
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
@@ -276,6 +281,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read # upload-sarif reads the workflow run via the Actions API
     steps:
       - name: Harden runner
         # KICS builds a Chainguard wolfi-base container and `apk add nodejs npm`.
@@ -323,6 +329,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read # upload-sarif reads the workflow run via the Actions API
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
@@ -365,6 +372,7 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
+      pull-requests: read # gitleaks-action lists PR commits via the Pulls API on pull_request
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
