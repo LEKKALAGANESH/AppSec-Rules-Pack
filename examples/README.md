@@ -33,7 +33,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install AppSec Rules Pack
-        run: python -m pip install "appsec-rules-pack==0.3.0"
+        run: python -m pip install "appsec-rules-pack==0.3.1"
 
       - name: Validate rules
         run: appsec-rules validate rules --fail-on-warnings --format json

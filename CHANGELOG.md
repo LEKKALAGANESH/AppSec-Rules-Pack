@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## v0.3.1 - 2026-08-11
 
 - Unreadable rule files now fail with an actionable error instead of a raw Python
   traceback, across every command. A file that is not valid UTF-8 (for example one
