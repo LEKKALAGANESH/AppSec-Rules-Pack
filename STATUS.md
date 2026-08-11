@@ -59,6 +59,16 @@ The published release was also validated as an end user: from an empty directory
 `pip install appsec-rules-pack` followed by the documented download of the baseline from the
 release assets validates at 19 rules, 0 errors, 0 warnings.
 
+## Performance and capacity
+
+Validation cost is linear in the number of rules — roughly constant per-rule work, with no
+super-linear step as packs grow. The JSON Schema is compiled once and reused (`lru_cache`),
+duplicate-ID detection is a single hash-map pass, and repeated validation shows no heap
+growth (measured stable over 2000 in-process runs). A pack of a few thousand rules validates
+in well under a second in-process; the CLI adds fixed Python-interpreter start-up on top.
+Any realistic rules pack sits far inside a CI quality-gate budget, so the pack size is not a
+practical constraint. These are relative characteristics, not a per-machine benchmark.
+
 ## Risks and limits
 
 - Cross-file duplicate ID detection applies only when validating a directory containing two
