@@ -41,12 +41,12 @@ pull request that passes the checks.
 
 ## Verified checks
 
-Last measured 2026-08-05 on Windows 11 with Python 3.12.10, and confirmed on CI:
+Last measured 2026-08-11 on Windows 11 with Python 3.12.10, and confirmed on CI:
 
 | Check | Result |
 | --- | --- |
 | `ruff check .` | clean |
-| `pytest --cov` | 130 passed, 97.46% coverage (gate 95%) |
+| `pytest --cov` | 149 passed, 97.17% coverage (gate 95%) |
 | `validate rules --require-examples --fail-on-warnings` | 1 file, 19 rules, 0 errors, 0 warnings |
 | `report coverage` | ASVS, API Top 10, CWE, SSDF at 19/19; optional Top 10:2025 at 17/19 |
 | `exports/` regeneration | no content drift, byte-identical output on every platform |
