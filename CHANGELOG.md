@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+- Unreadable rule files now fail with an actionable error instead of a raw Python
+  traceback, across every command. A file that is not valid UTF-8 (for example one
+  saved as UTF-16 by legacy PowerShell) escaped as an uncaught `UnicodeDecodeError`
+  from `validate`, `export index`, `export semgrep`, `export sarif`, and
+  `report coverage`; a YAML parse failure and a pathologically deep nesting
+  (`RecursionError`) did the same from the export and report commands. `validate`
+  reports the problem as a normal per-file validation error; the derivation commands
+  print `<Action> failed: could not decode/parse ... <path> ...` on stderr and exit 1.
+- `report coverage --output` now writes the text report. Without `--format json` the
+  `--output` option was silently ignored: the report went to stdout, the exit code
+  stayed 0, and the named file was never created. The text report now lands in the
+  file exactly like the JSON variant, with a `Wrote coverage report to <path>.`
+  confirmation.
+
 ## v0.3.0 - 2026-08-05
 
 - The baseline pack is now attached to every GitHub Release as `appsec-baseline.yaml`.
