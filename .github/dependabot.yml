@@ -33,6 +33,17 @@ updates:
     commit-message:
       prefix: "ci"
       include: "scope"
+    groups:
+      # `github/codeql-action` ships init, autobuild, analyze and upload-sarif from one
+      # release, and CodeQL requires init and analyze to come from the SAME version.
+      # Ungrouped, Dependabot raises one pull request per sub-action, and a partial
+      # merge leaves the workflow mixing versions. That very nearly happened here:
+      # three sub-action bumps to v4.37.6 were open at once (#14, #15, #16) with no
+      # matching pull request for init. Grouping is what keeps the pins consistent by
+      # construction rather than by whoever reviews the queue noticing in time.
+      codeql-action:
+        patterns:
+          - "github/codeql-action*"
     ignore:
       - dependency-name: "*"
         update-types:
