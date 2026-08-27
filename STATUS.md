@@ -6,16 +6,11 @@ this file describes where the project stands and what is known to be true right 
 
 ## Where it stands
 
-**Released:** `appsec-rules-pack` **0.3.0**, published to PyPI via Trusted Publishing
+**Released:** `appsec-rules-pack` **0.3.1**, published to PyPI via Trusted Publishing
 (OIDC, no long-lived credential). Each GitHub Release carries the wheel, the sdist, a
 CycloneDX SBOM, a SLSA build-provenance attestation, and the baseline pack itself as
-`appsec-baseline.yaml`.
-
-**In the tree, not yet released:** the version in `pyproject.toml` and `__init__.py` is
-already **0.3.1** and the changelog entry for it is written, but no `v0.3.1` tag, GitHub
-Release, or PyPI upload exists. The release was prepared on 2026-08-11 and then stalled
-when GitHub Actions stopped allocating runners. Until it is cut, `0.3.0` is the newest
-version anyone can install.
+`appsec-baseline.yaml`. From v0.3.1 the attestation covers all four assets, not only the
+distribution, so the baseline pack a consumer downloads can be verified too.
 
 **What ships:** a JSON Schema rule contract, a Python 3.12+ validator with a Typer CLI, and
 derivation-only export and reporting commands. The distribution contains the validator and
