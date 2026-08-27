@@ -5,15 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v0.3.1 - 2026-08-11
+## v0.3.1 - unreleased
 
-- The `Security CI/CD` pipeline now passes on pull requests and scheduled runs. Five
-  SARIF-uploading jobs (Semgrep, both Trivy scans, KICS, Trivy secrets) were missing
-  `actions: read`, which `github/codeql-action/upload-sarif` needs to read the workflow
-  run — the scans succeeded but the upload step failed. The Gitleaks history job was
-  missing `pull-requests: read`, so its `GET /pulls/{n}/commits` returned 403 on pull
-  requests. Both are minimal read-only permission additions; the failures were workflow
-  configuration gaps, not findings.
+- The `Security CI/CD` pipeline passes. Two separate things were wrong and only one of
+  them was a permission problem. Five SARIF-uploading jobs (Semgrep, both Trivy scans,
+  KICS, Trivy secrets) were missing `actions: read`, which
+  `github/codeql-action/upload-sarif` needs to read the workflow run, and the Gitleaks
+  history job was missing `pull-requests: read`, so its `GET /pulls/{n}/commits` returned
+  403 on pull requests. Both additions were necessary and are minimal and read-only. They
+  were not, however, why the pipeline was red: every failing step reported "Code scanning
+  is not enabled for this repository", because a private repository without GitHub
+  Advanced Security has no code-scanning store to upload SARIF into. The scans themselves
+  succeeded throughout — each failing job had already passed its own detection gate and
+  died on the upload. The uploads are now conditioned on the repository being public, and
+  the repository was made public on 2026-08-27. Neither failure was a security finding.
 - Unreadable rule files now fail with an actionable error instead of a raw Python
   traceback, across every command. A file that is not valid UTF-8 (for example one
   saved as UTF-16 by legacy PowerShell) escaped as an uncaught `UnicodeDecodeError`

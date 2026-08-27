@@ -125,7 +125,7 @@ pip install appsec-rules-pack
 ```
 
 This installs the `appsec-rules` console script. Pin to a reviewed version
-(for example `appsec-rules-pack==0.3.1`) when using it in a CI quality gate.
+(for example `appsec-rules-pack==0.3.0`) when using it in a CI quality gate.
 
 **What the distribution contains:** the validator, the CLI, and the JSON Schema. It does
 not ship a rules pack — the CLI validates whatever path you point it at.
@@ -134,7 +134,7 @@ To get the baseline pack of 19 rules, either take the version-pinned copy attach
 GitHub Release:
 
 ```bash
-curl -LO https://github.com/lucashgrifoni/AppSec-Rules-Pack/releases/download/v0.3.1/appsec-baseline.yaml
+curl -LO https://github.com/lucashgrifoni/AppSec-Rules-Pack/releases/download/v0.3.0/appsec-baseline.yaml
 ```
 
 or copy [`rules/appsec-baseline.yaml`](https://github.com/lucashgrifoni/AppSec-Rules-Pack/blob/master/rules/appsec-baseline.yaml) from this repository.
