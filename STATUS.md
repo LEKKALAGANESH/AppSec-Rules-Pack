@@ -41,9 +41,8 @@ pull request that passes the checks.
 
 ## Verified checks
 
-Last measured 2026-08-27 on Windows 11 with Python 3.12.10. The local rows were measured
-on this machine; the remote row is measured from the GitHub Actions run history and is not
-currently green -- see `Risks and limits`.
+Last measured 2026-08-27 on Windows 11 with Python 3.12.10, and confirmed on CI the same
+day after the repository was made public.
 
 | Check | Result |
 | --- | --- |
@@ -55,7 +54,7 @@ currently green -- see `Risks and limits`.
 | `python -m build` + `twine check` | wheel and sdist PASSED |
 | Clean-venv install of the built wheel | `appsec-rules` console script works, schema bundled |
 | Exit codes | 0 on a valid pack, non-zero on an invalid one |
-| Remote CI | `CI` green on `master` (run 31038011956, commit `411e2c7`, the current `master` head). `OpenSSF Scorecard` and `Security CI/CD` are NOT green; both are blocked, not passing. See `Risks and limits`. |
+| Remote CI | `CI`, `Security CI/CD` and `Policy Gate` all green on `a850223` (runs 33077333996, 33077333970, 33077333954). `Security CI/CD` is green with every scanner job executed, including `SAST - CodeQL`. |
 
 The published release was also validated as an end user: from an empty directory,
 `pip install appsec-rules-pack` followed by the documented download of the baseline from the
@@ -86,19 +85,17 @@ practical constraint. These are relative characteristics, not a per-machine benc
   assigned by topic; see `CONTRIBUTING.md` for the convention.
 - `owasp_top_10_2025` is optional and intentionally absent on two rules where no category
   matches without stretching.
-- Two remote workflows are currently blocked, and the blockers are in repository
-  configuration rather than in this codebase:
-  - GitHub Actions has allocated no runner for this repository since 2026-08-17. Every job
-    of every workflow ends in about three seconds with no runner and no steps executed
-    (measured on runs 31990651563, 32686026478 and 33071361715). Until that is resolved
-    nothing can be verified remotely, including this project's own CI.
-  - `Security CI/CD` cannot publish SARIF, because code scanning is unavailable on a private
-    repository without GitHub Advanced Security. The scanners themselves still gate on their
-    own exit codes, so detection is unaffected, but `SAST - CodeQL` and `SCA - Dependency
-    Review` have no local equivalent and cannot pass at all. `OpenSSF Scorecard` fails for a
-    related reason: its GraphQL commit query is not accessible to the workflow token on this
-    repository (`Resource not accessible by integration`, run 31355634841, 2026-08-10 --
-    before the runner outage began).
+- Two blockers held remote verification from 2026-08-10 to 2026-08-27 and are now resolved.
+  Both came from the repository being private, and both cleared when it was made public:
+  GitHub Actions had stopped allocating runners entirely (every job of every workflow ended
+  in about three seconds with no runner and no steps executed), and code scanning was
+  unavailable, so SARIF uploads and `SAST - CodeQL` could not succeed at all. They are
+  recorded here because the history matters for reading older runs, not because anything is
+  still open.
+- `OpenSSF Scorecard`'s open alerts predate 2026-08-10 and have not been recomputed since the
+  repository became public. Two of them, `BranchProtectionID` and `MaintainedID`, are the
+  kind Scorecard could not evaluate correctly on a private repository, so triage should wait
+  for a fresh run rather than act on the stale set.
 - Two required checks currently measure nothing on this repository. `SCA - Trivy` finds no
   dependency manifest it can parse (the project uses a setuptools `pyproject.toml` with no
   lockfile), and `IaC and Pipeline - Trivy` finds no supported configuration file (there is

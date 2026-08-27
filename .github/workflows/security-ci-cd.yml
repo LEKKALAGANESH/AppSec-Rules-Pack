@@ -34,24 +34,26 @@
 # upload and Dependency Review require GitHub Advanced Security; on public
 # repositories both are free.
 #
-# Code scanning availability (this repository is currently private, no GHAS):
-#   Uploading SARIF writes to the code-scanning store, which a private repository
-#   without GHAS does not have. Those uploads fail with "Code scanning is not
-#   enabled for this repository", which is a failure to PUBLISH evidence, not a
-#   failure to DETECT. Every scanner here gates on its own exit code -- Semgrep
-#   `--error`, Trivy `exit-code: 1`, KICS `fail_on`, Bandit `-ll -ii`, pip-audit,
-#   Gitleaks -- so the job already fails on findings with or without the upload.
-#   The upload steps are therefore conditioned on the repository being public.
-#   Nothing is suppressed: while private the evidence simply is not published, and
-#   the moment the repository goes public the uploads resume and a genuine upload
+# Code scanning availability:
+#   This repository is public as of 2026-08-27, so code scanning and Dependency
+#   Review are both available and the SARIF uploads run normally. The guards below
+#   are kept for the case the repository is ever made private again, and because
+#   they document why the uploads are allowed to be conditional at all.
+#
+#   The reasoning they encode: uploading SARIF writes to the code-scanning store,
+#   which a private repository without GHAS does not have, and the upload then
+#   fails with "Code scanning is not enabled for this repository". That is a
+#   failure to PUBLISH evidence, not a failure to DETECT. Every scanner here gates
+#   on its own exit code -- Semgrep `--error`, Trivy `exit-code: 1`, KICS
+#   `fail_on`, Bandit `-ll -ii`, pip-audit, Gitleaks -- so a job fails on findings
+#   with or without the upload. Nothing is suppressed either way: while private the
+#   evidence is not published, and once public the uploads run and a genuine upload
 #   error fails the job again.
 #
-#   Two jobs have no such fallback because the GitHub feature IS the analysis:
-#   `SAST - CodeQL` (analyze uploads its own results) and `SCA - Dependency
-#   Review`. Dependency Review is not a required check and is conditioned the same
-#   way. CodeQL is a required check and is left unconditional on purpose: silently
-#   skipping it would turn a required security gate green without running it.
-#   It fails until the repository is public or GHAS is enabled.
+#   `SAST - CodeQL` is deliberately NOT conditioned, because its analyze step IS
+#   the upload and it is a required status check -- skipping it would turn a
+#   required security gate green without running it. While the repository was
+#   private it failed honestly; now it runs and passes.
 
 name: Security CI/CD
 
