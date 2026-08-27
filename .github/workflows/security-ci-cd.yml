@@ -23,6 +23,25 @@
 # `security-events: write`, set at job level. On private repositories, SARIF
 # upload and Dependency Review require GitHub Advanced Security; on public
 # repositories both are free.
+#
+# Code scanning availability (this repository is currently private, no GHAS):
+#   Uploading SARIF writes to the code-scanning store, which a private repository
+#   without GHAS does not have. Those uploads fail with "Code scanning is not
+#   enabled for this repository", which is a failure to PUBLISH evidence, not a
+#   failure to DETECT. Every scanner here gates on its own exit code -- Semgrep
+#   `--error`, Trivy `exit-code: 1`, KICS `fail_on`, Bandit `-ll -ii`, pip-audit,
+#   Gitleaks -- so the job already fails on findings with or without the upload.
+#   The upload steps are therefore conditioned on the repository being public.
+#   Nothing is suppressed: while private the evidence simply is not published, and
+#   the moment the repository goes public the uploads resume and a genuine upload
+#   error fails the job again.
+#
+#   Two jobs have no such fallback because the GitHub feature IS the analysis:
+#   `SAST - CodeQL` (analyze uploads its own results) and `SCA - Dependency
+#   Review`. Dependency Review is not a required check and is conditioned the same
+#   way. CodeQL is a required check and is left unconditional on purpose: silently
+#   skipping it would turn a required security gate green without running it.
+#   It fails until the repository is public or GHAS is enabled.
 
 name: Security CI/CD
 
@@ -103,7 +122,9 @@ jobs:
             .
 
       - name: Upload Semgrep SARIF
-        if: always()
+        # Publication, not detection: the scan step above is the gate and already
+        # fails this job on findings. See the code-scanning note in the header.
+        if: always() && github.event.repository.private == false
         uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
         with:
           sarif_file: semgrep.sarif
@@ -224,7 +245,9 @@ jobs:
           skip-dirs: ${{ env.TRIVY_SKIP_DIRS }}
 
       - name: Upload Trivy dependency SARIF
-        if: always()
+        # Publication, not detection: the scan step above is the gate and already
+        # fails this job on findings. See the code-scanning note in the header.
+        if: always() && github.event.repository.private == false
         uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
         with:
           sarif_file: trivy-deps.sarif
@@ -268,7 +291,9 @@ jobs:
           skip-dirs: ${{ env.TRIVY_SKIP_DIRS }}
 
       - name: Upload Trivy IaC SARIF
-        if: always()
+        # Publication, not detection: the scan step above is the gate and already
+        # fails this job on findings. See the code-scanning note in the header.
+        if: always() && github.event.repository.private == false
         uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
         with:
           sarif_file: trivy-iac.sarif
@@ -316,7 +341,9 @@ jobs:
           exclude_paths: ".git,dist,build,.pytest_cache,.ruff_cache"
 
       - name: Upload KICS SARIF
-        if: always()
+        # Publication, not detection: the scan step above is the gate and already
+        # fails this job on findings. See the code-scanning note in the header.
+        if: always() && github.event.repository.private == false
         uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
         with:
           sarif_file: kics-results/results.sarif
@@ -360,7 +387,9 @@ jobs:
           skip-dirs: ${{ env.TRIVY_SKIP_DIRS }}
 
       - name: Upload Trivy secrets SARIF
-        if: always()
+        # Publication, not detection: the scan step above is the gate and already
+        # fails this job on findings. See the code-scanning note in the header.
+        if: always() && github.event.repository.private == false
         uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
         with:
           sarif_file: trivy-secrets.sarif
@@ -407,7 +436,9 @@ jobs:
   dependency-review:
     name: SCA - Dependency Review (PR)
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    # Requires the dependency graph plus GHAS on a private repository; see the
+    # code-scanning note in the header. Not a required status check.
+    if: github.event_name == 'pull_request' && github.event.repository.private == false
     timeout-minutes: 15
     permissions:
       contents: read
