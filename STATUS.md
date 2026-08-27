@@ -92,10 +92,26 @@ practical constraint. These are relative characteristics, not a per-machine benc
   unavailable, so SARIF uploads and `SAST - CodeQL` could not succeed at all. They are
   recorded here because the history matters for reading older runs, not because anything is
   still open.
-- `OpenSSF Scorecard`'s open alerts predate 2026-08-10 and have not been recomputed since the
-  repository became public. Two of them, `BranchProtectionID` and `MaintainedID`, are the
-  kind Scorecard could not evaluate correctly on a private repository, so triage should wait
-  for a fresh run rather than act on the stale set.
+- `OpenSSF Scorecard` recomputed on 2026-08-27, after the repository became public, and
+  reports 13 open alerts. `Maintained` cleared on its own; it had been a stale artifact of
+  the period when Scorecard could not evaluate a private repository. The rest are accepted
+  positions rather than defects, and are recorded here so they are owned rather than merely
+  open:
+  - `Branch-Protection`, score 8/10, is accurate. It objects that administrators can bypass
+    the `master-protection` ruleset, and that only one approving review is required. Both
+    are deliberate: this is a single-maintainer project, so a second reviewer does not exist
+    and removing the admin bypass would leave nobody able to merge. The residual risk is
+    that a mistaken or compromised maintainer action has no second pair of eyes. Revisit if
+    the project gains a second maintainer.
+  - `Pinned-Dependencies`, score 7/10, eleven instances, is also accurate but narrower than
+    it looks: every GitHub Action is already pinned to an immutable commit SHA. What is
+    unpinned is `pip install` inside `run:` steps. Pinning those by hash means a
+    `--require-hashes` requirements file covering the full transitive set, which is a real
+    change of dependency strategy -- today the loose ranges are what let CI notice upstream
+    breakage early, and there is deliberately no lockfile. It would, as a side effect, give
+    `SCA - Trivy` a manifest to scan. Open decision, not an oversight.
+  - `Fuzzing` is a true absence. The validator parses untrusted YAML, so a fuzzing harness
+    over the loader and schema path is a reasonable future addition rather than a fix.
 - Two required checks currently measure nothing on this repository. `SCA - Trivy` finds no
   dependency manifest it can parse (the project uses a setuptools `pyproject.toml` with no
   lockfile), and `IaC and Pipeline - Trivy` finds no supported configuration file (there is
