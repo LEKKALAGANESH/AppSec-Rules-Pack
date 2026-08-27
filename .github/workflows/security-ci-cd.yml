@@ -13,6 +13,16 @@
 # SAST is still covered by Semgrep + CodeQL + Bandit, and SCA by Trivy +
 # pip-audit + Dependency Review, so no external secret is required.
 #
+# Measured coverage, so the job list is not read as more than it is: on this
+# repository as it stands, `SCA - Trivy` reports "Supported files for scanner(s)
+# not found" (a setuptools pyproject with no lockfile is not a manifest Trivy
+# parses for vulnerabilities) and `IaC and Pipeline - Trivy` reports "Detected
+# config files: 0" (no Dockerfile, Terraform, or Kubernetes manifest, and Trivy
+# misconfig does not cover Actions workflows). Both pass while scanning zero
+# files. SCA coverage here is really pip-audit; workflow coverage is really KICS
+# and actionlint. The two jobs are kept because they start measuring something
+# the moment a lockfile or a container/IaC file lands.
+#
 # Supply-chain hardening:
 #   - Third-party and first-party actions are pinned to immutable commit SHAs.
 #   - The trailing comment records the semantic tag used to resolve the SHA.

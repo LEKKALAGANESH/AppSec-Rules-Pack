@@ -41,19 +41,21 @@ pull request that passes the checks.
 
 ## Verified checks
 
-Last measured 2026-08-11 on Windows 11 with Python 3.12.10, and confirmed on CI:
+Last measured 2026-08-27 on Windows 11 with Python 3.12.10. The local rows were measured
+on this machine; the remote row is measured from the GitHub Actions run history and is not
+currently green -- see `Risks and limits`.
 
 | Check | Result |
 | --- | --- |
 | `ruff check .` | clean |
-| `pytest --cov` | 149 passed, 97.17% coverage (gate 95%) |
+| `pytest --cov` | 149 passed, 97.22% coverage (gate 95%) |
 | `validate rules --require-examples --fail-on-warnings` | 1 file, 19 rules, 0 errors, 0 warnings |
 | `report coverage` | ASVS, API Top 10, CWE, SSDF at 19/19; optional Top 10:2025 at 17/19 |
 | `exports/` regeneration | no content drift, byte-identical output on every platform |
 | `python -m build` + `twine check` | wheel and sdist PASSED |
 | Clean-venv install of the built wheel | `appsec-rules` console script works, schema bundled |
 | Exit codes | 0 on a valid pack, non-zero on an invalid one |
-| Remote CI | `CI` and `OpenSSF Scorecard` green on `master`; `Security CI/CD` green after the SARIF-upload/`actions: read` and Gitleaks/`pull-requests: read` permission fix in v0.3.1 |
+| Remote CI | `CI` green on `master` (run 31038011956, commit `411e2c7`, the current `master` head). `OpenSSF Scorecard` and `Security CI/CD` are NOT green; both are blocked, not passing. See `Risks and limits`. |
 
 The published release was also validated as an end user: from an empty directory,
 `pip install appsec-rules-pack` followed by the documented download of the baseline from the
@@ -84,6 +86,26 @@ practical constraint. These are relative characteristics, not a per-machine benc
   assigned by topic; see `CONTRIBUTING.md` for the convention.
 - `owasp_top_10_2025` is optional and intentionally absent on two rules where no category
   matches without stretching.
+- Two remote workflows are currently blocked, and the blockers are in repository
+  configuration rather than in this codebase:
+  - GitHub Actions has allocated no runner for this repository since 2026-08-17. Every job
+    of every workflow ends in about three seconds with no runner and no steps executed
+    (measured on runs 31990651563, 32686026478 and 33071361715). Until that is resolved
+    nothing can be verified remotely, including this project's own CI.
+  - `Security CI/CD` cannot publish SARIF, because code scanning is unavailable on a private
+    repository without GitHub Advanced Security. The scanners themselves still gate on their
+    own exit codes, so detection is unaffected, but `SAST - CodeQL` and `SCA - Dependency
+    Review` have no local equivalent and cannot pass at all. `OpenSSF Scorecard` fails for a
+    related reason: its GraphQL commit query is not accessible to the workflow token on this
+    repository (`Resource not accessible by integration`, run 31355634841, 2026-08-10 --
+    before the runner outage began).
+- Two required checks currently measure nothing on this repository. `SCA - Trivy` finds no
+  dependency manifest it can parse (the project uses a setuptools `pyproject.toml` with no
+  lockfile), and `IaC and Pipeline - Trivy` finds no supported configuration file (there is
+  no Dockerfile, Terraform, or Kubernetes manifest here, and Trivy's misconfiguration
+  scanner does not cover GitHub Actions workflows). Both pass, and both scan zero files.
+  Real SCA coverage comes from `pip-audit`; real workflow coverage from KICS and actionlint.
+  Both become meaningful the moment a lockfile or a container/IaC file is added.
 
 ## Next steps
 
