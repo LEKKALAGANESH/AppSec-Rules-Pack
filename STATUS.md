@@ -6,10 +6,11 @@ this file describes where the project stands and what is known to be true right 
 
 ## Where it stands
 
-**Released:** `appsec-rules-pack` **0.3.0**, published to PyPI via Trusted Publishing
+**Released:** `appsec-rules-pack` **0.3.1**, published to PyPI via Trusted Publishing
 (OIDC, no long-lived credential). Each GitHub Release carries the wheel, the sdist, a
 CycloneDX SBOM, a SLSA build-provenance attestation, and the baseline pack itself as
-`appsec-baseline.yaml`.
+`appsec-baseline.yaml`. From v0.3.1 the attestation covers all four assets, not only the
+distribution, so the baseline pack a consumer downloads can be verified too.
 
 **What ships:** a JSON Schema rule contract, a Python 3.12+ validator with a Typer CLI, and
 derivation-only export and reporting commands. The distribution contains the validator and
@@ -41,23 +42,34 @@ pull request that passes the checks.
 
 ## Verified checks
 
-Last measured 2026-08-05 on Windows 11 with Python 3.12.10, and confirmed on CI:
+Last measured 2026-08-27 on Windows 11 with Python 3.12.10, and confirmed on CI the same
+day after the repository was made public.
 
 | Check | Result |
 | --- | --- |
 | `ruff check .` | clean |
-| `pytest --cov` | 130 passed, 97.46% coverage (gate 95%) |
+| `pytest --cov` | 149 passed, 97.22% coverage (gate 95%) |
 | `validate rules --require-examples --fail-on-warnings` | 1 file, 19 rules, 0 errors, 0 warnings |
 | `report coverage` | ASVS, API Top 10, CWE, SSDF at 19/19; optional Top 10:2025 at 17/19 |
 | `exports/` regeneration | no content drift, byte-identical output on every platform |
 | `python -m build` + `twine check` | wheel and sdist PASSED |
 | Clean-venv install of the built wheel | `appsec-rules` console script works, schema bundled |
 | Exit codes | 0 on a valid pack, non-zero on an invalid one |
-| Remote CI | `CI`, `Security CI/CD`, and `OpenSSF Scorecard` green on `master` |
+| Remote CI | `CI`, `Security CI/CD` and `Policy Gate` all green on `a850223` (runs 33077333996, 33077333970, 33077333954). `Security CI/CD` is green with every scanner job executed, including `SAST - CodeQL`. |
 
 The published release was also validated as an end user: from an empty directory,
 `pip install appsec-rules-pack` followed by the documented download of the baseline from the
 release assets validates at 19 rules, 0 errors, 0 warnings.
+
+## Performance and capacity
+
+Validation cost is linear in the number of rules — roughly constant per-rule work, with no
+super-linear step as packs grow. The JSON Schema is compiled once and reused (`lru_cache`),
+duplicate-ID detection is a single hash-map pass, and repeated validation shows no heap
+growth (measured stable over 2000 in-process runs). A pack of a few thousand rules validates
+in well under a second in-process; the CLI adds fixed Python-interpreter start-up on top.
+Any realistic rules pack sits far inside a CI quality-gate budget, so the pack size is not a
+practical constraint. These are relative characteristics, not a per-machine benchmark.
 
 ## Risks and limits
 
@@ -74,6 +86,40 @@ release assets validates at 19 rules, 0 errors, 0 warnings.
   assigned by topic; see `CONTRIBUTING.md` for the convention.
 - `owasp_top_10_2025` is optional and intentionally absent on two rules where no category
   matches without stretching.
+- Two blockers held remote verification from 2026-08-10 to 2026-08-27 and are now resolved.
+  Both came from the repository being private, and both cleared when it was made public:
+  GitHub Actions had stopped allocating runners entirely (every job of every workflow ended
+  in about three seconds with no runner and no steps executed), and code scanning was
+  unavailable, so SARIF uploads and `SAST - CodeQL` could not succeed at all. They are
+  recorded here because the history matters for reading older runs, not because anything is
+  still open.
+- `OpenSSF Scorecard` recomputed on 2026-08-27, after the repository became public, and
+  reports 13 open alerts. `Maintained` cleared on its own; it had been a stale artifact of
+  the period when Scorecard could not evaluate a private repository. The rest are accepted
+  positions rather than defects, and are recorded here so they are owned rather than merely
+  open:
+  - `Branch-Protection`, score 8/10, is accurate. It objects that administrators can bypass
+    the `master-protection` ruleset, and that only one approving review is required. Both
+    are deliberate: this is a single-maintainer project, so a second reviewer does not exist
+    and removing the admin bypass would leave nobody able to merge. The residual risk is
+    that a mistaken or compromised maintainer action has no second pair of eyes. Revisit if
+    the project gains a second maintainer.
+  - `Pinned-Dependencies`, score 7/10, eleven instances, is also accurate but narrower than
+    it looks: every GitHub Action is already pinned to an immutable commit SHA. What is
+    unpinned is `pip install` inside `run:` steps. Pinning those by hash means a
+    `--require-hashes` requirements file covering the full transitive set, which is a real
+    change of dependency strategy -- today the loose ranges are what let CI notice upstream
+    breakage early, and there is deliberately no lockfile. It would, as a side effect, give
+    `SCA - Trivy` a manifest to scan. Open decision, not an oversight.
+  - `Fuzzing` is a true absence. The validator parses untrusted YAML, so a fuzzing harness
+    over the loader and schema path is a reasonable future addition rather than a fix.
+- Two required checks currently measure nothing on this repository. `SCA - Trivy` finds no
+  dependency manifest it can parse (the project uses a setuptools `pyproject.toml` with no
+  lockfile), and `IaC and Pipeline - Trivy` finds no supported configuration file (there is
+  no Dockerfile, Terraform, or Kubernetes manifest here, and Trivy's misconfiguration
+  scanner does not cover GitHub Actions workflows). Both pass, and both scan zero files.
+  Real SCA coverage comes from `pip-audit`; real workflow coverage from KICS and actionlint.
+  Both become meaningful the moment a lockfile or a container/IaC file is added.
 
 ## Next steps
 

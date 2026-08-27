@@ -13,6 +13,16 @@
 # SAST is still covered by Semgrep + CodeQL + Bandit, and SCA by Trivy +
 # pip-audit + Dependency Review, so no external secret is required.
 #
+# Measured coverage, so the job list is not read as more than it is: on this
+# repository as it stands, `SCA - Trivy` reports "Supported files for scanner(s)
+# not found" (a setuptools pyproject with no lockfile is not a manifest Trivy
+# parses for vulnerabilities) and `IaC and Pipeline - Trivy` reports "Detected
+# config files: 0" (no Dockerfile, Terraform, or Kubernetes manifest, and Trivy
+# misconfig does not cover Actions workflows). Both pass while scanning zero
+# files. SCA coverage here is really pip-audit; workflow coverage is really KICS
+# and actionlint. The two jobs are kept because they start measuring something
+# the moment a lockfile or a container/IaC file lands.
+#
 # Supply-chain hardening:
 #   - Third-party and first-party actions are pinned to immutable commit SHAs.
 #   - The trailing comment records the semantic tag used to resolve the SHA.
@@ -23,6 +33,27 @@
 # `security-events: write`, set at job level. On private repositories, SARIF
 # upload and Dependency Review require GitHub Advanced Security; on public
 # repositories both are free.
+#
+# Code scanning availability:
+#   This repository is public as of 2026-08-27, so code scanning and Dependency
+#   Review are both available and the SARIF uploads run normally. The guards below
+#   are kept for the case the repository is ever made private again, and because
+#   they document why the uploads are allowed to be conditional at all.
+#
+#   The reasoning they encode: uploading SARIF writes to the code-scanning store,
+#   which a private repository without GHAS does not have, and the upload then
+#   fails with "Code scanning is not enabled for this repository". That is a
+#   failure to PUBLISH evidence, not a failure to DETECT. Every scanner here gates
+#   on its own exit code -- Semgrep `--error`, Trivy `exit-code: 1`, KICS
+#   `fail_on`, Bandit `-ll -ii`, pip-audit, Gitleaks -- so a job fails on findings
+#   with or without the upload. Nothing is suppressed either way: while private the
+#   evidence is not published, and once public the uploads run and a genuine upload
+#   error fails the job again.
+#
+#   `SAST - CodeQL` is deliberately NOT conditioned, because its analyze step IS
+#   the upload and it is a required status check -- skipping it would turn a
+#   required security gate green without running it. While the repository was
+#   private it failed honestly; now it runs and passes.
 
 name: Security CI/CD
 
@@ -42,7 +73,9 @@ on:
   merge_group:
 
 # Least-privilege top level: read-only. Jobs that upload SARIF elevate to
-# `security-events: write` themselves, and CodeQL adds `actions: read`.
+# `security-events: write` and `actions: read` themselves — the
+# codeql-action `upload-sarif` reads the workflow run via the Actions API, so
+# `actions: read` is required for the upload to succeed, not only for CodeQL.
 permissions:
   contents: read
 
@@ -63,6 +96,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read # upload-sarif reads the workflow run via the Actions API
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
@@ -100,8 +134,10 @@ jobs:
             .
 
       - name: Upload Semgrep SARIF
-        if: always()
-        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        # Publication, not detection: the scan step above is the gate and already
+        # fails this job on findings. See the code-scanning note in the header.
+        if: always() && github.event.repository.private == false
+        uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
         with:
           sarif_file: semgrep.sarif
           category: semgrep
@@ -136,15 +172,15 @@ jobs:
           persist-credentials: false
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
         with:
           languages: python
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        uses: github/codeql-action/autobuild@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
         with:
           category: "/language:python"
 
@@ -188,6 +224,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read # upload-sarif reads the workflow run via the Actions API
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
@@ -220,8 +257,10 @@ jobs:
           skip-dirs: ${{ env.TRIVY_SKIP_DIRS }}
 
       - name: Upload Trivy dependency SARIF
-        if: always()
-        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        # Publication, not detection: the scan step above is the gate and already
+        # fails this job on findings. See the code-scanning note in the header.
+        if: always() && github.event.repository.private == false
+        uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
         with:
           sarif_file: trivy-deps.sarif
           category: trivy-deps
@@ -233,6 +272,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read # upload-sarif reads the workflow run via the Actions API
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
@@ -263,8 +303,10 @@ jobs:
           skip-dirs: ${{ env.TRIVY_SKIP_DIRS }}
 
       - name: Upload Trivy IaC SARIF
-        if: always()
-        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        # Publication, not detection: the scan step above is the gate and already
+        # fails this job on findings. See the code-scanning note in the header.
+        if: always() && github.event.repository.private == false
+        uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
         with:
           sarif_file: trivy-iac.sarif
           category: trivy-iac
@@ -276,6 +318,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read # upload-sarif reads the workflow run via the Actions API
     steps:
       - name: Harden runner
         # KICS builds a Chainguard wolfi-base container and `apk add nodejs npm`.
@@ -310,8 +353,10 @@ jobs:
           exclude_paths: ".git,dist,build,.pytest_cache,.ruff_cache"
 
       - name: Upload KICS SARIF
-        if: always()
-        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        # Publication, not detection: the scan step above is the gate and already
+        # fails this job on findings. See the code-scanning note in the header.
+        if: always() && github.event.repository.private == false
+        uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
         with:
           sarif_file: kics-results/results.sarif
           category: kics
@@ -323,6 +368,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read # upload-sarif reads the workflow run via the Actions API
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
@@ -353,8 +399,10 @@ jobs:
           skip-dirs: ${{ env.TRIVY_SKIP_DIRS }}
 
       - name: Upload Trivy secrets SARIF
-        if: always()
-        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        # Publication, not detection: the scan step above is the gate and already
+        # fails this job on findings. See the code-scanning note in the header.
+        if: always() && github.event.repository.private == false
+        uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
         with:
           sarif_file: trivy-secrets.sarif
           category: trivy-secrets
@@ -365,6 +413,7 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
+      pull-requests: read # gitleaks-action lists PR commits via the Pulls API on pull_request
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
@@ -399,7 +448,9 @@ jobs:
   dependency-review:
     name: SCA - Dependency Review (PR)
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    # Requires the dependency graph plus GHAS on a private repository; see the
+    # code-scanning note in the header. Not a required status check.
+    if: github.event_name == 'pull_request' && github.event.repository.private == false
     timeout-minutes: 15
     permissions:
       contents: read

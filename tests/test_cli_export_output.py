@@ -67,3 +67,23 @@ def test_report_coverage_output_is_written_with_lf_endings(tmp_path: Path) -> No
 
     assert result.exit_code == 0, result.output
     assert b"\r\n" not in out.read_bytes()
+
+
+def test_report_coverage_text_format_honors_output(tmp_path: Path) -> None:
+    """`--output` without `--format json` used to be silently ignored.
+
+    The text report went to stdout, the exit code stayed 0, and the named file was
+    never created — the user believed the report had been saved.
+    """
+
+    out = tmp_path / "coverage.txt"
+
+    result = runner.invoke(app, ["report", "coverage", str(BASELINE), "--output", str(out)])
+
+    assert result.exit_code == 0, result.output
+    content = out.read_text(encoding="utf-8")
+    assert "Mapping coverage for" in content
+    assert "owasp_asvs" in content
+    # The report body belongs in the file; stdout confirms the write instead.
+    assert "Wrote coverage report to" in result.output
+    assert "Mapping coverage for" not in result.output

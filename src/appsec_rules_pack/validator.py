@@ -165,6 +165,20 @@ def _load_rules_payload(path: Path) -> tuple[Any, tuple[ValidationIssue, ...]]:
                 message=f"could not read YAML file: {exc}",
             ),
         )
+    except UnicodeDecodeError as exc:
+        return None, (
+            ValidationIssue(
+                level="error",
+                message=f"could not decode YAML file as UTF-8: {exc.reason}",
+            ),
+        )
+    except RecursionError:
+        return None, (
+            ValidationIssue(
+                level="error",
+                message="could not parse YAML file: nesting depth exceeds the supported limit",
+            ),
+        )
     except yaml.YAMLError as exc:
         return None, (
             ValidationIssue(

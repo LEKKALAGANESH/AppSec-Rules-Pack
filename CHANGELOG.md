@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.3.1 - 2026-08-27
+
+- The `Security CI/CD` pipeline passes. Two separate things were wrong and only one of
+  them was a permission problem. Five SARIF-uploading jobs (Semgrep, both Trivy scans,
+  KICS, Trivy secrets) were missing `actions: read`, which
+  `github/codeql-action/upload-sarif` needs to read the workflow run, and the Gitleaks
+  history job was missing `pull-requests: read`, so its `GET /pulls/{n}/commits` returned
+  403 on pull requests. Both additions were necessary and are minimal and read-only. They
+  were not, however, why the pipeline was red: every failing step reported "Code scanning
+  is not enabled for this repository", because a private repository without GitHub
+  Advanced Security has no code-scanning store to upload SARIF into. The scans themselves
+  succeeded throughout — each failing job had already passed its own detection gate and
+  died on the upload. The uploads are now conditioned on the repository being public, and
+  the repository was made public on 2026-08-27. Neither failure was a security finding.
+- Unreadable rule files now fail with an actionable error instead of a raw Python
+  traceback, across every command. A file that is not valid UTF-8 (for example one
+  saved as UTF-16 by legacy PowerShell) escaped as an uncaught `UnicodeDecodeError`
+  from `validate`, `export index`, `export semgrep`, `export sarif`, and
+  `report coverage`; a YAML parse failure and a pathologically deep nesting
+  (`RecursionError`) did the same from the export and report commands. `validate`
+  reports the problem as a normal per-file validation error; the derivation commands
+  print `<Action> failed: could not decode/parse ... <path> ...` on stderr and exit 1.
+- `report coverage --output` now writes the text report. Without `--format json` the
+  `--output` option was silently ignored: the report went to stdout, the exit code
+  stayed 0, and the named file was never created. The text report now lands in the
+  file exactly like the JSON variant, with a `Wrote coverage report to <path>.`
+  confirmation.
+- The validation summary now pluralizes every count: `1 file, 1 rule, 0 errors,
+  1 warning` instead of `1 rules`/`1 errors`/`1 warnings`. The file count was already
+  handled; rules, errors, and warnings were not. Text output only — the JSON report
+  is unchanged.
+
 ## v0.3.0 - 2026-08-05
 
 - The baseline pack is now attached to every GitHub Release as `appsec-baseline.yaml`.

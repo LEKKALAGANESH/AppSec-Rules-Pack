@@ -3,18 +3,19 @@
 import json
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import typer
 import yaml
 
 from appsec_rules_pack import __version__
-from appsec_rules_pack.exporter import build_index_from_files
-from appsec_rules_pack.reporter import build_coverage_from_files
-from appsec_rules_pack.sarif_export import build_sarif_from_files
+from appsec_rules_pack.exporter import build_index
+from appsec_rules_pack.loader import load_yaml_file
+from appsec_rules_pack.reporter import build_coverage
+from appsec_rules_pack.sarif_export import build_sarif
 from appsec_rules_pack.semgrep_scaffold import (
     PATTERN_PLACEHOLDER,
-    build_semgrep_scaffold_from_files,
+    build_semgrep_scaffold,
 )
 from appsec_rules_pack.validator import (
     ValidationIssue,
@@ -126,6 +127,45 @@ def _write_document(output: Path, document: str) -> None:
         reason = error.strerror or str(error)
         typer.echo(f"Write failed: cannot write to {output}: {reason}.", err=True)
         raise typer.Exit(code=1) from error
+
+
+def _load_payloads(rule_files: tuple[Path, ...], action: str) -> list[Any]:
+    """Load rule files for derivation, reporting read failures as actionable CLI errors.
+
+    A file that cannot be read, decoded as UTF-8, or parsed as YAML used to escape as a
+    raw Python traceback from the export and report commands. Judging pack structure
+    stays in ``validate``; this only guards the file-to-payload step.
+    """
+
+    payloads: list[Any] = []
+    for rule_file in rule_files:
+        try:
+            payloads.append(load_yaml_file(rule_file))
+        except OSError as error:
+            reason = error.strerror or str(error)
+            typer.echo(f"{action} failed: could not read {rule_file}: {reason}.", err=True)
+            raise typer.Exit(code=1) from error
+        except UnicodeDecodeError as error:
+            typer.echo(
+                f"{action} failed: could not decode {rule_file} as UTF-8: {error.reason}.",
+                err=True,
+            )
+            raise typer.Exit(code=1) from error
+        except RecursionError as error:
+            typer.echo(
+                f"{action} failed: could not parse YAML in {rule_file}: "
+                "nesting depth exceeds the supported limit.",
+                err=True,
+            )
+            raise typer.Exit(code=1) from error
+        except yaml.YAMLError as error:
+            problem = getattr(error, "problem", None) or "invalid YAML"
+            typer.echo(
+                f"{action} failed: could not parse YAML in {rule_file}: {problem}.",
+                err=True,
+            )
+            raise typer.Exit(code=1) from error
+    return payloads
 
 
 def _iter_rule_files(path: Path) -> tuple[Path, ...]:
@@ -263,8 +303,9 @@ def validate(
     file_summary = _plural(len(rule_files), "file", "files")
     verdict = "passed" if passed else "failed"
     typer.echo(
-        f"Validation {verdict}: {file_summary}, {rule_count} rules, "
-        f"{error_count} errors, {warning_count} warnings."
+        f"Validation {verdict}: {file_summary}, {_plural(rule_count, 'rule', 'rules')}, "
+        f"{_plural(error_count, 'error', 'errors')}, "
+        f"{_plural(warning_count, 'warning', 'warnings')}."
     )
     if not passed:
         raise typer.Exit(code=1)
@@ -286,7 +327,7 @@ def export_index(
         typer.echo(f"Export failed: no YAML rule files found in {rules_path}.", err=True)
         raise typer.Exit(code=1)
 
-    index = build_index_from_files(list(rule_files))
+    index = build_index(_load_payloads(rule_files, "Export"))
     document = json.dumps(index, indent=2) + "\n"
 
     if output is not None:
@@ -313,7 +354,7 @@ def export_semgrep(
         typer.echo(f"Export failed: no YAML rule files found in {rules_path}.", err=True)
         raise typer.Exit(code=1)
 
-    scaffold = build_semgrep_scaffold_from_files(list(rule_files))
+    scaffold = build_semgrep_scaffold(_load_payloads(rule_files, "Export"))
     body = yaml.safe_dump(scaffold, sort_keys=False, allow_unicode=True)
     document = SEMGREP_HEADER + body
 
@@ -343,7 +384,7 @@ def export_sarif(
         typer.echo(f"Export failed: no YAML rule files found in {rules_path}.", err=True)
         raise typer.Exit(code=1)
 
-    sarif = build_sarif_from_files(list(rule_files))
+    sarif = build_sarif(_load_payloads(rule_files, "Export"))
     document = json.dumps(sarif, indent=2) + "\n"
 
     if output is not None:
@@ -372,7 +413,7 @@ def report_coverage(
         typer.echo(f"Report failed: no YAML rule files found in {rules_path}.", err=True)
         raise typer.Exit(code=1)
 
-    coverage = build_coverage_from_files(list(rule_files))
+    coverage = build_coverage(_load_payloads(rule_files, "Report"))
 
     if coverage["rules"] == 0:
         # The report is derived without schema validation, so a pack whose `rules` key is
@@ -395,14 +436,23 @@ def report_coverage(
         return
 
     total = coverage["rules"]
-    typer.echo(f"Mapping coverage for {_plural(total, 'rule', 'rules')}:")
+    lines = [f"Mapping coverage for {_plural(total, 'rule', 'rules')}:"]
     for framework, stats in coverage["frameworks"].items():
         covered = stats["covered"]
         pct = round(100 * covered / total) if total else 0
         line = f"  {framework:<22} {covered}/{total}  ({pct}%)"
         if stats["missing"]:
             line += "  missing: " + ", ".join(stats["missing"])
-        typer.echo(line)
+        lines.append(line)
     if coverage["categories"]:
         cats = ", ".join(f"{name}={count}" for name, count in coverage["categories"].items())
-        typer.echo(f"Categories: {cats}")
+        lines.append(f"Categories: {cats}")
+
+    document = "\n".join(lines) + "\n"
+    if output is not None:
+        # `--output` in the default text mode used to be silently ignored; the text
+        # report now lands in the file exactly like the JSON variant does.
+        _write_document(output, document)
+        typer.echo(f"Wrote coverage report to {output}.")
+        return
+    typer.echo(document, nl=False)
