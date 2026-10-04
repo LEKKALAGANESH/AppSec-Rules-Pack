@@ -1,0 +1,49 @@
+name: Rule proposal
+description: Propose a generic AppSec rule for the baseline pack.
+title: "[Rule]: "
+labels: [rule-proposal]
+body:
+  - type: textarea
+    id: rule-intent
+    attributes:
+      label: Rule Intent
+      description: Describe the generic security behavior the rule should encourage or detect.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence-basis
+    attributes:
+      label: Evidence Basis
+      description: |
+        List the framework mappings, weakness IDs, or primary references that support the
+        rule. Prefer OWASP ASVS, OWASP API Security Top 10, CWE, NIST SSDF, or similarly
+        authoritative sources.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      placeholder: |
+        - Category:
+        - Target surface:
+        - Expected evidence:
+        - Review signals:
+    validations:
+      required: true
+  - type: textarea
+    id: validation-plan
+    attributes:
+      label: Validation Plan
+      description: Explain how the rule can be validated with fixtures, schema checks, or CLI output.
+    validations:
+      required: true
+  - type: checkboxes
+    id: data-safety
+    attributes:
+      label: Data Safety
+      options:
+        - label: >-
+            This proposal does not include secrets, customer data, internal endpoints,
+            tenant identifiers, or environment-specific configuration.
+          required: true
