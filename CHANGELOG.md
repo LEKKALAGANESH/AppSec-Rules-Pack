@@ -22,6 +22,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refreshed project status with dated local checks and explicit remote verification
   limits instead of treating historical CI success as current evidence.
 
+### Related campaign proposals
+
+The following changes are tracked separately and must be merged and verified before
+being included in a release:
+
+- Structured community issue forms and a 1280×640 social-preview asset ([#24](https://github.com/lucashgrifoni/AppSec-Rules-Pack/pull/24))
+- Two optional executable Python/Flask Semgrep references, with documented limits and
+  positive/negative fixtures ([#33](https://github.com/lucashgrifoni/AppSec-Rules-Pack/pull/33)); the CodeQL fixture findings remain an integration blocker
+- Strict downstream validation examples, regression-tested documentation commands,
+  and contributor test policy ([#34](https://github.com/lucashgrifoni/AppSec-Rules-Pack/pull/34))
+
+The landing-page v0.3.1 correction is deployed through [#25](https://github.com/lucashgrifoni/AppSec-Rules-Pack/pull/25).
+No new package version was published by this campaign. Bounded YAML fuzzing remains
+open in [#32](https://github.com/lucashgrifoni/AppSec-Rules-Pack/issues/32).
+
 ## v0.3.1 - 2026-08-27
 
 - The `Security CI/CD` pipeline passes. Two separate things were wrong and only one of

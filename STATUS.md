@@ -43,7 +43,7 @@ establish that CI passes.
 ## Verified checks
 
 Measured 2026-10-04 on Linux with Python 3.12.14, from source based on
-`8d5d205a92aac5c988cdce90401d3876675b1f55`. Results below describe this documentation
+`d785f85b8c02c8b8768fc8ac76ca84e9ebd0731d`. Results below describe this documentation
 revision; earlier Windows and release checks are historical, not rerun claims.
 
 | Check | Result |
@@ -57,8 +57,8 @@ revision; earlier Windows and release checks are historical, not rerun claims.
 | `twine check` and clean-venv wheel install | Not rerun in this documentation check |
 | CLI exit codes | Baseline: 0; missing-title fixture: 1; output recorded in `docs/assets/cli-demo.svg` |
 | Repository visibility | Public on 2026-10-04 |
-| Remote security CI | Latest measured [Security CI/CD 36372233927](https://github.com/lucashgrifoni/AppSec-Rules-Pack/actions/runs/36372233927), 2026-09-28: failed at CodeQL on `8d5d205`. No fresh passing security run has been verified |
-| Remote Scorecard | [Run 36376195346, attempt 2](https://github.com/lucashgrifoni/AppSec-Rules-Pack/actions/runs/36376195346), rerun on 2026-10-04: passed on `8d5d205` |
+| Remote CI and security | On `d785f85`, [CI 37176413041](https://github.com/lucashgrifoni/AppSec-Rules-Pack/actions/runs/37176413041) and [Security CI/CD 37176413414](https://github.com/lucashgrifoni/AppSec-Rules-Pack/actions/runs/37176413414) passed on 2026-10-04, including CodeQL and all fourteen required jobs; push-only Dependency Review was skipped as designed |
+| Remote Scorecard | [Run 37176413045](https://github.com/lucashgrifoni/AppSec-Rules-Pack/actions/runs/37176413045) passed on `d785f85` on 2026-10-04 |
 
 The v0.3.1 release and prior end-user installation checks are documented in
 [`CHANGELOG.md`](CHANGELOG.md). See the README's release-verification instructions for
@@ -66,13 +66,16 @@ checking the provenance of a downloaded asset independently.
 
 ## Performance and capacity
 
-Validation cost is linear in the number of rules — roughly constant per-rule work, with no
-super-linear step as packs grow. The JSON Schema is compiled once and reused (`lru_cache`),
-duplicate-ID detection is a single hash-map pass, and repeated validation shows no heap
-growth (measured stable over 2000 in-process runs). A pack of a few thousand rules validates
-in well under a second in-process; the CLI adds fixed Python-interpreter start-up on top.
-Any realistic rules pack sits far inside a CI quality-gate budget, so the pack size is not a
-practical constraint. These are relative characteristics, not a per-machine benchmark.
+The schema resource is parsed and checked once per process, then cached with
+`lru_cache`; a `Draft202012Validator` instance is constructed for each validation.
+Duplicate-ID detection uses a hash-map pass. Total cost also depends on YAML size,
+shape, and schema checks, so no worst-case linear-time or throughput guarantee is
+claimed here.
+
+Earlier local checks reported stable memory across 2,000 repeated in-process runs
+and sub-second validation for packs containing a few thousand rules. Those benchmarks
+were not repeated in this campaign and should not be treated as a current machine-
+independent capacity guarantee. The CLI also has Python startup overhead.
 
 ## Risks and limits
 
@@ -149,6 +152,23 @@ connects a rule to a relevant topic; it is not a claim that the rule covers a ca
 
 The resulting optional mapping coverage is 18 of 19 rules. An absent mapping is a
 recorded scope decision, not a failed validation or a claim that the control is unnecessary.
+
+## Campaign proposals awaiting review
+
+- [PR #24](https://github.com/lucashgrifoni/AppSec-Rules-Pack/pull/24): structured issue
+  forms and a social-preview image; uploading the image in Settings remains an owner action
+- [PR #33](https://github.com/lucashgrifoni/AppSec-Rules-Pack/pull/33): a separate two-rule
+  Python/Flask Semgrep reference layer. Its behavioral tests pass, but CodeQL reports
+  23 findings confined to intentional fixtures. That analysis check remains red;
+  no exclusion, dismissal, or scanner weakening was applied
+- [PR #34](https://github.com/lucashgrifoni/AppSec-Rules-Pack/pull/34): strict downstream
+  example commands, executable documentation tests, and an explicit contributor test policy
+- [Issue #32](https://github.com/lucashgrifoni/AppSec-Rules-Pack/issues/32): the bounded
+  YAML harness remains undelivered; incomplete work is not included in these proposals
+
+These are proposed changes, not capabilities of the published v0.3.1 distribution.
+They still need normal protected-branch approval. The single listed code owner cannot
+approve a pull request authored by that same account; no administrative bypass is used.
 
 ## Next steps
 
