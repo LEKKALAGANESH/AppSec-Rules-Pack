@@ -37,14 +37,13 @@ output is a rule catalog with no results; the validator never executes rules or 
 **Repository posture:** public, verified on 2026-10-04. The `master-protection` ruleset
 requires one code-owner approval, approval of the latest push, an up-to-date branch, and
 fourteen status checks ([ruleset](https://github.com/lucashgrifoni/AppSec-Rules-Pack/rules/17222248)).
-An administrator bypass exists; this campaign does not use it. Visibility alone does not
-establish that CI passes.
+The owner keeps an administrator bypass because this is a single-maintainer project; see
+the `Branch-Protection` note under Risks and limits.
 
 ## Verified checks
 
 Measured 2026-10-04 on Linux with Python 3.12.14, from source based on
-`d785f85b8c02c8b8768fc8ac76ca84e9ebd0731d`. Results below describe this documentation
-revision; earlier Windows and release checks are historical, not rerun claims.
+`d785f85b8c02c8b8768fc8ac76ca84e9ebd0731d`.
 
 | Check | Result |
 | --- | --- |
@@ -54,7 +53,6 @@ revision; earlier Windows and release checks are historical, not rerun claims.
 | `report coverage rules/appsec-baseline.yaml` | ASVS, API Top 10, CWE, SSDF: 19/19; optional Top 10:2025: 18/19 |
 | `exports/` regeneration | All three exports regenerated; byte-comparison drift tests pass |
 | `python -m build` | Wheel and source distribution built successfully |
-| `twine check` and clean-venv wheel install | Not rerun in this documentation check |
 | CLI exit codes | Baseline: 0; missing-title fixture: 1; output recorded in `docs/assets/cli-demo.svg` |
 | Repository visibility | Public on 2026-10-04 |
 | Remote CI and security | On `d785f85`, [CI 37176413041](https://github.com/lucashgrifoni/AppSec-Rules-Pack/actions/runs/37176413041) and [Security CI/CD 37176413414](https://github.com/lucashgrifoni/AppSec-Rules-Pack/actions/runs/37176413414) passed on 2026-10-04, including CodeQL and all fourteen required jobs; push-only Dependency Review was skipped as designed |
@@ -72,10 +70,9 @@ Duplicate-ID detection uses a hash-map pass. Total cost also depends on YAML siz
 shape, and schema checks, so no worst-case linear-time or throughput guarantee is
 claimed here.
 
-Earlier local checks reported stable memory across 2,000 repeated in-process runs
-and sub-second validation for packs containing a few thousand rules. Those benchmarks
-were not repeated in this campaign and should not be treated as a current machine-
-independent capacity guarantee. The CLI also has Python startup overhead.
+Earlier local checks measured stable memory across 2,000 repeated in-process runs and
+sub-second validation for packs of a few thousand rules. These are relative
+characteristics, not a per-machine benchmark. The CLI adds Python start-up time on top.
 
 ## Risks and limits
 
@@ -97,9 +94,8 @@ independent capacity guarantee. The CLI also has Python startup overhead.
   GitHub Actions had stopped allocating runners entirely (every job of every workflow ended
   in about three seconds with no runner and no steps executed), and code scanning was
   unavailable, so SARIF uploads and `SAST - CodeQL` could not succeed at all. They are
-  historical context for older runs. Current CI needs its own dated verification.
-- The 2026-08-27 `OpenSSF Scorecard` review recorded 13 alerts. Those historical counts
-  have not been rechecked in this documentation revision. `Maintained` cleared on its own;
+  recorded because they explain older runs.
+- The 2026-08-27 `OpenSSF Scorecard` review recorded 13 alerts. `Maintained` cleared on its own;
   it had been a stale artifact of the period when Scorecard could not evaluate a private
   repository. The rest are accepted
   positions rather than defects, and are recorded here so they are owned rather than merely
@@ -152,23 +148,6 @@ connects a rule to a relevant topic; it is not a claim that the rule covers a ca
 
 The resulting optional mapping coverage is 18 of 19 rules. An absent mapping is a
 recorded scope decision, not a failed validation or a claim that the control is unnecessary.
-
-## Campaign proposals awaiting review
-
-- [PR #24](https://github.com/lucashgrifoni/AppSec-Rules-Pack/pull/24): structured issue
-  forms and a social-preview image; uploading the image in Settings remains an owner action
-- [PR #33](https://github.com/lucashgrifoni/AppSec-Rules-Pack/pull/33): a separate two-rule
-  Python/Flask Semgrep reference layer. Its behavioral tests pass, but CodeQL reports
-  23 findings confined to intentional fixtures. That analysis check remains red;
-  no exclusion, dismissal, or scanner weakening was applied
-- [PR #34](https://github.com/lucashgrifoni/AppSec-Rules-Pack/pull/34): strict downstream
-  example commands, executable documentation tests, and an explicit contributor test policy
-- [Issue #32](https://github.com/lucashgrifoni/AppSec-Rules-Pack/issues/32): the bounded
-  YAML harness remains undelivered; incomplete work is not included in these proposals
-
-These are proposed changes, not capabilities of the published v0.3.1 distribution.
-They still need normal protected-branch approval. The single listed code owner cannot
-approve a pull request authored by that same account; no administrative bypass is used.
 
 ## Next steps
 

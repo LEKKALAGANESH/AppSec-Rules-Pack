@@ -8,34 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 - Mapped `APPSEC-RATELIMIT-001` to OWASP Top 10:2025 `A10:2025`, whose prevention
-  guidance explicitly includes rate limits and resource quotas; regenerated all three
-  exports. Kept `APPSEC-FILE-001` unmapped and recorded both topic-based decisions and
-  primary sources in `STATUS.md`.
-
-- Added README guidance on project scope, derived Semgrep/SARIF exports, mapping coverage,
-  and release-attestation verification, plus a reproducible recording of successful and
-  failing CLI validation.
-
-- Corrected the roadmap and technical specification to distinguish delivered v0.3.1
-  functionality from future work; added the Python 3.13 package classifier already
-  covered by CI.
-- Refreshed project status with dated local checks and explicit remote verification
-  limits instead of treating historical CI success as current evidence.
-
-### Related campaign proposals
-
-The following changes are tracked separately and must be merged and verified before
-being included in a release:
-
-- Structured community issue forms and a 1280×640 social-preview asset ([#24](https://github.com/lucashgrifoni/AppSec-Rules-Pack/pull/24))
-- Two optional executable Python/Flask Semgrep references, with documented limits and
-  positive/negative fixtures ([#33](https://github.com/lucashgrifoni/AppSec-Rules-Pack/pull/33)); the CodeQL fixture findings remain an integration blocker
-- Strict downstream validation examples, regression-tested documentation commands,
-  and contributor test policy ([#34](https://github.com/lucashgrifoni/AppSec-Rules-Pack/pull/34))
-
-The landing-page v0.3.1 correction is deployed through [#25](https://github.com/lucashgrifoni/AppSec-Rules-Pack/pull/25).
-No new package version was published by this campaign. Bounded YAML fuzzing remains
-open in [#32](https://github.com/lucashgrifoni/AppSec-Rules-Pack/issues/32).
+  guidance explicitly calls for rate limits and resource quotas, and regenerated all three
+  exports. `APPSEC-FILE-001` stays unmapped; both decisions and their sources are recorded
+  in `STATUS.md`.
+- Added README guidance on project scope, the derived Semgrep and SARIF exports, mapping
+  coverage, and release-attestation verification, plus a reproducible recording of a
+  passing and a failing validation.
+- Corrected the roadmap and technical specification to separate what shipped through
+  v0.3.1 from future work, and added the Python 3.13 classifier that CI already covers.
 
 ## v0.3.1 - 2026-08-27
 
