@@ -1169,6 +1169,8 @@ rules:
         - V2.4
       owasp_api_top_10_2023:
         - API4:2023
+      owasp_top_10_2025:
+        - A10:2025
       cwe:
         - CWE-770
         - CWE-307
