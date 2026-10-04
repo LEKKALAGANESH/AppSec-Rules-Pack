@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+- Mapped `APPSEC-RATELIMIT-001` to OWASP Top 10:2025 `A10:2025`, whose prevention
+  guidance explicitly calls for rate limits and resource quotas, and regenerated all three
+  exports. `APPSEC-FILE-001` stays unmapped; both decisions and their sources are recorded
+  in `STATUS.md`.
+- Added README guidance on project scope, the derived Semgrep and SARIF exports, mapping
+  coverage, and release-attestation verification, plus a reproducible recording of a
+  passing and a failing validation.
+- Corrected the roadmap and technical specification to separate what shipped through
+  v0.3.1 from future work, and added the Python 3.13 classifier that CI already covers.
+
 ## v0.3.1 - 2026-08-27
 
 - The `Security CI/CD` pipeline passes. Two separate things were wrong and only one of

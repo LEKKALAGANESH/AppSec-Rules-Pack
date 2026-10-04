@@ -36,7 +36,7 @@ jobs:
         run: python -m pip install "appsec-rules-pack==0.3.1"
 
       - name: Validate rules
-        run: appsec-rules validate rules --fail-on-warnings --format json
+        run: appsec-rules validate rules --require-examples --fail-on-warnings --format json
 ```
 
 For local development inside this repository, install the project in editable mode
@@ -44,8 +44,13 @@ and validate the bundled baseline rules:
 
 ```bash
 python -m pip install -e ".[dev]"
-python -m appsec_rules_pack validate rules --fail-on-warnings --format json
+python -m appsec_rules_pack validate rules --require-examples --fail-on-warnings --format json
 ```
+
+Both examples apply the repository's strict validation flags: enabled rules need
+compliant and violating examples, and warnings produce a failing exit code.
+`tests/test_documented_gates.py` executes these documented commands against valid,
+missing-example, and warning cases to keep the examples aligned with that contract.
 
 ## Portable JSON Gate (any CI or local shell)
 

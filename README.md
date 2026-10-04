@@ -14,6 +14,23 @@ This initial pack is intentionally generic. It does not contain product names,
 tenant identifiers, customer data, secrets, internal endpoints, or environment-specific
 configuration.
 
+## Why / When not to use
+
+Use this rule contract and engine-agnostic validator to keep AppSec review guidance,
+expected evidence, remediation, and exceptions consistent across teams and CI gates.
+It validates the structure and consistency of rule packs.
+
+It does not execute rules or scan application code. Use a separate scanner when you need
+vulnerability findings. Framework mappings support review; they do not establish
+compliance. The derived Semgrep scaffold has placeholder patterns, and the SARIF catalog
+has no findings. See [the scope](TECHNICAL_SPEC.md) and
+[ADR-0001](docs/adr/0001-engine-agnostic-validator.md).
+
+![Recorded CLI demo: successful baseline validation followed by a missing-title error](docs/assets/cli-demo.svg)
+
+The demo records real CLI output. [Recreate it](docs/assets/record-cli-demo.py) from a
+source checkout with `python docs/assets/record-cli-demo.py` after installing the project.
+
 ## What Is Included
 
 - A short technical specification in `TECHNICAL_SPEC.md` and a direction summary in
@@ -25,7 +42,7 @@ configuration.
   configuration, session hardening, CSRF, webhook/message integrity, excessive data
   exposure, mass assignment, open redirect, and rate limiting. Every rule ships an
   explicit compliant and violating code example.
-- A Python 3.12 validator with a Typer CLI supporting `--version`,
+- A Python 3.12+ validator with a Typer CLI supporting `--version`,
   `--fail-on-warnings`, `--require-examples`, and `--format json` output for CI, plus
   derivation-only `export index`, `export semgrep`, `export sarif`, and `report coverage`
   subcommands.
@@ -54,56 +71,36 @@ configuration.
 ```text
 .
 |-- .github/
-|   |-- ISSUE_TEMPLATE/
-|   |   |-- bug_report.md
-|   |   |-- config.yml
-|   |   `-- rule_proposal.md
-|   |-- workflows/
-|   |   |-- ci.yml
-|   |   |-- policy-gate.yml
-|   |   |-- publish-pypi.yml
-|   |   |-- scorecard.yml
-|   |   `-- security-ci-cd.yml
+|   |-- ISSUE_TEMPLATE/     # bug reports, rule proposals, and template configuration
+|   |-- workflows/         # CI, security, policy gate, Scorecard, and publishing
 |   |-- CODEOWNERS
 |   |-- PULL_REQUEST_TEMPLATE.md
 |   `-- dependabot.yml
 |-- docs/
-|   `-- adr/            # architecture decision records
+|   |-- adr/               # architecture decision records
+|   `-- assets/            # recorded CLI demo and its reproduction script
 |-- examples/
-|   `-- README.md
+|   `-- README.md          # GitHub Actions integration example
 |-- exports/
 |   |-- appsec-baseline.index.json
-|   |-- sarif/
-|   |   `-- appsec-baseline.sarif.json
-|   `-- semgrep/
-|       `-- appsec-baseline.semgrep.yaml
-|-- rules/
-|   `-- appsec-baseline.yaml
-|-- src/
-|   `-- appsec_rules_pack/
-|       |-- __init__.py
-|       |-- __main__.py
-|       |-- cli.py
-|       |-- exporter.py
-|       |-- loader.py
-|       |-- reporter.py
-|       |-- sarif_export.py
-|       |-- semgrep_scaffold.py
-|       |-- validator.py
-|       `-- schemas/
-|           `-- appsec-rule.schema.json
+|   |-- sarif/appsec-baseline.sarif.json
+|   `-- semgrep/appsec-baseline.semgrep.yaml
+|-- rules/appsec-baseline.yaml
+|-- src/appsec_rules_pack/
+|   |-- __init__.py
+|   |-- __main__.py
+|   |-- cli.py
+|   |-- exporter.py
+|   |-- loader.py
+|   |-- reporter.py
+|   |-- sarif_export.py
+|   |-- semgrep_scaffold.py
+|   |-- validator.py
+|   `-- schemas/appsec-rule.schema.json
 |-- tests/
-|   |-- fixtures/
-|   |   |-- cross-file-dup/
-|   |   |-- exception-consistency/
-|   |   |-- fail/
-|   |   |-- pass/
-|   |   `-- warn/
-|   |-- helpers.py        # shared subprocess helper for tests that shell out
-|   `-- test_*.py         # one module per validated behaviour
-|-- .gitattributes
-|-- .gitignore
-|-- .gitleaks.toml
+|   |-- fixtures/          # valid, invalid, warning, and multi-file packs
+|   |-- helpers.py
+|   `-- test_*.py
 |-- CHANGELOG.md
 |-- CODE_OF_CONDUCT.md
 |-- CONTRIBUTING.md
@@ -139,6 +136,31 @@ curl -LO https://github.com/lucashgrifoni/AppSec-Rules-Pack/releases/download/v0
 
 or copy [`rules/appsec-baseline.yaml`](https://github.com/lucashgrifoni/AppSec-Rules-Pack/blob/master/rules/appsec-baseline.yaml) from this repository.
 You can also write your own pack from the example below.
+
+### Verify a release
+
+After downloading a release asset, verify its SLSA build-provenance attestation with a
+current [GitHub CLI](https://cli.github.com/manual/gh_attestation_verify):
+
+```bash
+gh attestation verify appsec-baseline.yaml --repo lucashgrifoni/AppSec-Rules-Pack
+```
+
+For a tighter check, also require the publishing workflow and the release tag you chose:
+
+```bash
+gh attestation verify appsec-baseline.yaml \
+  --repo lucashgrifoni/AppSec-Rules-Pack \
+  --signer-workflow lucashgrifoni/AppSec-Rules-Pack/.github/workflows/publish-pypi.yml \
+  --source-ref refs/tags/v0.3.1
+```
+
+Use the same command with a downloaded wheel, source distribution, or `sbom.cdx.json`.
+The [publishing workflow](.github/workflows/publish-pypi.yml) attests those files and the
+baseline pack; [ADR-0003](docs/adr/0003-release-provenance.md) explains the release design.
+A successful check verifies the artifact against its signed provenance and the selected
+identity constraints. It does not certify that the rule guidance is complete or that an
+application is secure. Treat a failed or unavailable verification as unverified provenance.
 
 ### From source (development)
 
@@ -279,9 +301,35 @@ appsec-rules export index rules/appsec-baseline.yaml
 appsec-rules export index rules/appsec-baseline.yaml --output exports/appsec-baseline.index.json
 ```
 
-The JSON report contains a `summary` object (`files`, `rules`, `errors`, `warnings`,
-`ok`) and a `files` array with per-file issues (`level`, `path`, `message`). The exit
-code is non-zero when validation fails, matching the text output.
+Derive the non-executable Semgrep scaffold. It contains rule metadata and
+`TODO-REPLACE-WITH-DETECTION-PATTERN` placeholders, not detection logic:
+
+```bash
+appsec-rules export semgrep rules/appsec-baseline.yaml --output exports/semgrep/appsec-baseline.semgrep.yaml
+```
+
+Derive a SARIF 2.1.0 rule catalog. Its `tool.driver.rules` describes the rules, and its
+`results` array is empty because no scanner ran:
+
+```bash
+appsec-rules export sarif rules/appsec-baseline.yaml --output exports/sarif/appsec-baseline.sarif.json
+```
+
+Report how many rules have a mapping for each framework, plus missing rule IDs and
+counts by AppSec category. This is mapping coverage, not security-test or compliance coverage:
+
+```bash
+appsec-rules report coverage rules/appsec-baseline.yaml
+appsec-rules report coverage rules/appsec-baseline.yaml --format json --output coverage.json
+```
+
+Export and coverage commands derive metadata without running the validator first. Run
+`validate rules --require-examples --fail-on-warnings` separately as the quality gate.
+
+The JSON **validation** report (`validate --format json`) contains a `summary` object
+(`files`, `rules`, `errors`, `warnings`, `ok`) and a `files` array with per-file issues
+(`level`, `path`, `message`). Validation exits non-zero on errors or on warnings when
+`--fail-on-warnings` is set, matching the text output.
 
 ## Use It In Your CI
 
