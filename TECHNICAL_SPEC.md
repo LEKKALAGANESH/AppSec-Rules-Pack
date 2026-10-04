@@ -9,7 +9,7 @@ as a starting point for secure code review or CI policy gates.
 
 - Generic AppSec baseline rules only.
 - YAML rule pack authored against a JSON Schema contract.
-- Python 3.12 CLI validator using Typer.
+- Python 3.12+ CLI validator using Typer.
 - Unit tests for structural and semantic validation.
 - Documentation for setup, usage, and contribution.
 
@@ -71,7 +71,9 @@ for CI consumption.
 
 - Deepen reference exports under `exports/` (rule index, Semgrep scaffold, and SARIF
   rule catalog are delivered; add real detection patterns or other formats as needed).
-- Add pass/fail fixtures per rule under `fixtures/`.
+- Add executable detection fixtures only alongside a separate engine-specific layer.
+  Every baseline rule already includes compliant and violating examples, checked by
+  `tests/test_examples.py`; validator pass/fail fixtures live in `tests/fixtures/`.
 
 Signed release evidence is in place: tagged releases publish to PyPI via Trusted
 Publishing (OIDC, no long-lived token) and attach a CycloneDX SBOM plus a SLSA
