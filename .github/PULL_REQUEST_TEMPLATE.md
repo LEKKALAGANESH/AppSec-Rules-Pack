@@ -6,7 +6,9 @@
 
 - [ ] `python -m ruff check .`
 - [ ] `python -m pytest --cov=appsec_rules_pack --cov-report=term-missing`
-- [ ] `python -m appsec_rules_pack validate rules --fail-on-warnings`
+- [ ] `python -m appsec_rules_pack validate rules --require-examples --fail-on-warnings`
+- [ ] `python -m build`
+- [ ] New behavior has automated tests; bug fixes have a regression test or an explained verification alternative.
 
 ## Security And Data Safety
 
