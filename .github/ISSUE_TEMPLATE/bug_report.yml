@@ -1,0 +1,44 @@
+name: Bug report
+description: Report a validator, schema, packaging, or documentation defect.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the defect and the observed behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Provide a minimal, reproducible example.
+      placeholder: |
+        1. Command or action:
+        2. Input file or fixture:
+        3. Actual result:
+        4. Expected result:
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: |
+        - Python version:
+        - Package version or commit:
+        - Operating system:
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: |
+        Paste concise logs or output. Do not include secrets, credentials, customer data,
+        private findings, or proprietary source code.
+      render: text
+    validations:
+      required: false
