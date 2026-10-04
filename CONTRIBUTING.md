@@ -68,6 +68,19 @@ Exceptions must include:
 The default maximum exception duration is 90 days. Longer exceptions need explicit
 review before being added to this pack.
 
+## Automated Test Policy
+
+Every major new capability must include automated tests for its supported behavior
+and important failure cases. A bug fix must include a regression test that fails
+without the fix, unless the pull request explains why that is not practical and
+provides another reproducible verification method.
+
+Rule and mapping changes must preserve the baseline examples and derived-export
+checks. Keep the normal coverage gate enabled. Optional engine integrations need
+their own behavioral fixtures; a passing catalog validator does not test a scanner.
+Documentation commands that act as quality gates should have executable examples
+that demonstrate both acceptance and rejection.
+
 ## Required Checks
 
 ```powershell
